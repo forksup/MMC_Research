@@ -25,7 +25,6 @@ class ThreadWithResult(threading.Thread):
 
 
 import sys
-runthreads = False
 sys.path.append("/mnt/watchandhelp/PycharmProjects/mtd-learn")
 
 import matplotlib.pyplot as plt
@@ -81,19 +80,19 @@ def plot_data(x, title, metric: str, ax, colors: str):
                             alpha=.2, edgecolor='#3F7F4C', facecolor=colors[types.index(method)],
                             linewidth=0)
             ax.set_xlabel("State Space Size")
+
             if "accuracy" in metric:
                 ax.set_ylabel("Prediction Accuracy")
             else:
                 ax.set_ylabel("Time")
-
-        break
 
     ax.set_title(title)
     ax.legend()
 
 
 # data_size_args( initial value, max value, step)
-def run_experiment(methods, data_size_args, state_size_args, amount_to_average, data_generator, order):
+def run_experiment(methods, data_size_args, state_size_args, amount_to_average, data_generator, order, runthreads):
+
     print("Beginning experiment")
     data_results = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
@@ -160,7 +159,8 @@ if __name__ == "__main__":
     data_size_args = (120000, 120001, 10000)
     state_size_args = (15, 20, 1)
     avg_amt = 10
-    data_results, sgo_type = run_experiment(methods, data_size_args, state_size_args, avg_amt, data_generator, order)
+    threading = False
+    data_results, sgo_type = run_experiment(methods, data_size_args, state_size_args, avg_amt, data_generator, order, threading)
 
 
 

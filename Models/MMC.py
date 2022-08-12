@@ -141,8 +141,9 @@ class MMC(object):
                 result[kn][key] = n[kn][key] * math.log(probs[kn][key]+1)
         return result
 
-    def create_index_dict(self):
-        return {s: i for i, s in enumerate(self.sgo)}
+    @staticmethod
+    def create_index_dict(sgo):
+        return {s: i for i, s in enumerate(sgo)}
 
     def find_SGO_greedy(self):
         states_to_check = set(self.states) - {-1}
@@ -199,9 +200,8 @@ class MMC(object):
         for SGO in SGOs:
             if len(SGOs) == 1:
                 count_dict, n = self.calculate_probabilities(SGO)
-                sgo_results.append(-1, SGO, deepcopy(n))
+                sgo_results.append((-1, SGO, deepcopy(n)))
             else:
-
                 sgo_results.append((self.gen_prob(count_dict, n), SGO, deepcopy(n)))
             """
             genprobs = self.gen_prob_dict(count_dict, n)
@@ -273,7 +273,7 @@ class MMC(object):
         self.cpt = sgo_results[0][2]
         self.SGO = sgo_results[0][1]
         self.build_cpt()
-        self.index_dict = self.create_index_dict()
+        self.index_dict = self.create_index_dict(self.SGO)
         if self.verbose:
             print("SGO Found")
             print(self.SGO)
