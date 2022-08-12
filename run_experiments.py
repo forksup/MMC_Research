@@ -153,12 +153,13 @@ def run_experiment(methods, data_size_args, state_size_args, amount_to_average, 
 
 
 #data_generator = Markov_Data.HMM_Data
-data_generator = MMC_Data.MMC_data
-order = 5
-data_size_args = (120000, 120001, 10000)
-state_size_args = (15, 20, 1)
-avg_amt = 10
-data_results, sgo_type = run_experiment(methods, data_size_args, state_size_args, avg_amt, data_generator, order)
+if __name__ == "__main__":
+    data_generator = MMC_Data.MMC_data
+    order = 5
+    data_size_args = (120000, 120001, 10000)
+    state_size_args = (15, 20, 1)
+    avg_amt = 10
+    data_results, sgo_type = run_experiment(methods, data_size_args, state_size_args, avg_amt, data_generator, order)
 """
 colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
 fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))

@@ -28,11 +28,8 @@ class MMC(object):
         self.verbose = verbose
 
     @staticmethod
-    def find_high(lag, sgo=None):
-        for s in sgo:
-            if s in lag:
-                return s
-        return None
+    def find_high(lag, index_dict, sgo=None):
+        return min(lag, key=lambda x: index_dict[x])
 
     def geometric_mean(self):
         # use greedy for hillclimb
@@ -157,14 +154,15 @@ class MMC(object):
         while len(states_to_check) > 1:
 
             n = defaultdict(lambda: defaultdict(float))
-
+            index_dict = defaultdict(lambda: float('inf'))
             for i, lag in enumerate(self.X_train):
-                s = self.find_high(lag, SGO)
-                if s is None:
+                s = self.find_high(lag, index_dict, SGO)
+                if s not in SGO:
                     for st in lag:
                         n[st][self.y_train[i]] += 1
             print("done")
             s = max(n, key=func)
+            index_dict[s] = len(SGO)
             SGO.append(s)
             states_to_check.remove(s)
         SGO.append(states_to_check.pop())
