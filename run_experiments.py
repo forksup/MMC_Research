@@ -94,7 +94,7 @@ def plot_data(x, title, metric: str, ax, colors: str):
 
 # data_size_args( initial value, max value, step)
 def run_experiment(methods, data_size_args, state_size_args, amount_to_average, data_generator, order):
-    start_time = datetime.now()
+    print("Beginning experiment")
     data_results = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
     total_iterations = len(range(*data_size_args)) * len(range(*state_size_args)) * amount_to_average * len(methods)
@@ -148,26 +148,23 @@ def run_experiment(methods, data_size_args, state_size_args, amount_to_average, 
                         (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
     # print("Minutes Taken:")
     # print((datetime.now() - start_time).total_seconds() // 60)
-
+    print("Experiment completed")
     return data_results, sgo_type
 
 
 #data_generator = Markov_Data.HMM_Data
 if __name__ == "__main__":
+
     data_generator = MMC_Data.MMC_data
     order = 5
     data_size_args = (120000, 120001, 10000)
     state_size_args = (15, 20, 1)
     avg_amt = 10
     data_results, sgo_type = run_experiment(methods, data_size_args, state_size_args, avg_amt, data_generator, order)
+
+
+
 """
-colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
-fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
-fig.suptitle(f'{data_generator.__name__} Size {data_size_args[0]} Order {order} Avg: {avg_amt} Method: {sgo_type} Threads: {runthreads}', y=.99)
-for im, met in enumerate(metrics):
-    plot_data(list(range(*state_size_args)), met, met, axs[im], colors)
-fig.tight_layout()
-fig.show()
 
 for st in range(*state_size_args):
     print("State Space", {st})

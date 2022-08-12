@@ -26,10 +26,12 @@ class MMC(object):
         self.SGO = None
         self.name = "MMC"
         self.verbose = verbose
+        self.index_dict = {}
 
-    @staticmethod
-    def find_high(lag, index_dict, sgo=None):
-        return min(lag, key=lambda x: index_dict[x])
+    def find_high(self, lag, index_dict = None, sgo=None):
+        if index_dict is not None:
+            return min(lag, key=lambda x: index_dict[x])
+        return min(lag, key=lambda x: self.index_dict[x])
 
     def geometric_mean(self):
         # use greedy for hillclimb
@@ -139,6 +141,9 @@ class MMC(object):
                 result[kn][key] = n[kn][key] * math.log(probs[kn][key]+1)
         return result
 
+    def create_index_dict(self):
+        return {s: i for i, s in enumerate(self.sgo)}
+
     def find_SGO_greedy(self):
         states_to_check = set(self.states) - {-1}
         SGO = []
@@ -151,16 +156,24 @@ class MMC(object):
             else:
                 return 0
 
+        index_dict = defaultdict(lambda: float('inf'))
+
         while len(states_to_check) > 1:
 
             n = defaultdict(lambda: defaultdict(float))
-            index_dict = defaultdict(lambda: float('inf'))
+
             for i, lag in enumerate(self.X_train):
                 s = self.find_high(lag, index_dict, SGO)
-                if s not in SGO:
+                if s in states_to_check:
                     for st in lag:
                         n[st][self.y_train[i]] += 1
             print("done")
+            # In the case all the data already has a high state
+            if len(n) == 0:
+                for s in states_to_check:
+                    SGO.append(s)
+                return SGO
+
             s = max(n, key=func)
             index_dict[s] = len(SGO)
             SGO.append(s)
@@ -184,8 +197,12 @@ class MMC(object):
             SGOs = [self.geometric_mean()]
         sgo_results = []
         for SGO in SGOs:
-            count_dict, n = self.calculate_probabilities(SGO)
-            sgo_results.append((self.gen_prob(count_dict, n), SGO, deepcopy(n)))
+            if len(SGOs) == 1:
+                count_dict, n = self.calculate_probabilities(SGO)
+                sgo_results.append(-1, SGO, deepcopy(n))
+            else:
+
+                sgo_results.append((self.gen_prob(count_dict, n), SGO, deepcopy(n)))
             """
             genprobs = self.gen_prob_dict(count_dict, n)
             #self.cpt = n
@@ -256,6 +273,7 @@ class MMC(object):
         self.cpt = sgo_results[0][2]
         self.SGO = sgo_results[0][1]
         self.build_cpt()
+        self.index_dict = self.create_index_dict()
         if self.verbose:
             print("SGO Found")
             print(self.SGO)

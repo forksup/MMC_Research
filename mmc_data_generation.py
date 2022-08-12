@@ -28,6 +28,7 @@ sgo_type = "greedy"
 methods = [MMC, HMC, DBN, MTD]
 types = [m.__name__ for m in methods]
 dataset = Blocksworld_Data.blocks
+#dataset = MMC_data
 
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
