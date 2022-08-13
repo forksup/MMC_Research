@@ -18,7 +18,7 @@ class sgo_types(Enum):
 
 class MMC(object):
 
-    def __init__(self, state_size, order, sgo_method: sgo_types = sgo_types.greedy, verbose = True):
+    def __init__(self, state_size, order, sgo_method: sgo_types = sgo_types.greedy, verbose = False):
         self.sgom = sgo_method
         self.state_size = state_size
         self.states = [i for i in range(state_size)]

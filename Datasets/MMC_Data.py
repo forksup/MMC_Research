@@ -11,7 +11,7 @@ from datetime import datetime
 class MMC_data(object):
 
     @staticmethod
-    def gen_data(state_size=4, order=1, size=50000, verbose=True):
+    def gen_data(state_size=4, order=1, size=50000, verbose=False):
 
         cg = ChainGenerator(list(ascii_letters[:state_size]),
                             order=1,
