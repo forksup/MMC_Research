@@ -1,7 +1,7 @@
 from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
 from Models.HMC import HMC
-from Models.DBN import DBN
+from Models.DBN import FMC
 from Models.model_sources.mtd_source import MTD
 
 from Datasets import Blocksworld_Data
@@ -25,10 +25,10 @@ testing_master = []
 state_count = 7
 order = 3
 sgo_type = "greedy"
-methods = [MMC, HMC, DBN, MTD]
+methods = [MMC, HMC, FMC, MTD]
 types = [m.__name__ for m in methods]
-dataset = Blocksworld_Data.blocks
-#dataset = MMC_data
+#dataset = Blocksworld_Data.blocks
+dataset = MMC_data
 
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):

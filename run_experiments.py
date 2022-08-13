@@ -6,7 +6,7 @@ from progressbar import progressbar
 from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
 from Models.HMC import HMC
-from Models.DBN import DBN
+from Models.DBN import FMC
 from datetime import datetime
 from collections import defaultdict
 from Models.model_sources.mtd_source import MTD
@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 
 plt.rcParams['figure.figsize'] = [20, 20]
 
-methods = [MMC, MTD, HMC, DBN]
+methods = [MMC, MTD, HMC, FMC]
 
 mr = []
 mt = []

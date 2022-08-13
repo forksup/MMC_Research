@@ -28,10 +28,10 @@ class MMC(object):
         self.verbose = verbose
         self.index_dict = {}
 
-    def find_high(self, lag, index_dict = None, sgo=None):
-        if index_dict is not None:
-            return min(lag, key=lambda x: index_dict[x])
-        return min(lag, key=lambda x: self.index_dict[x])
+    @staticmethod
+    def find_high(lag, index_dict = None):
+        return min(lag, key=lambda x: index_dict[x])
+        #return min(lag, key=lambda x: self.index_dict[x])
 
     def geometric_mean(self):
         # use greedy for hillclimb
@@ -42,6 +42,8 @@ class MMC(object):
         while len(states_left_to_check) > 1:
             states = []
             for s in states_left_to_check:
+                self.index_dict = defaultdict(lambda: float('inf'))
+                self.index_dict[s] = 0
                 prob_res = list(self.calculate_probabilities([s])[0][s].values())
                 c = sum(prob_res)
                 p_values = {i: prob_res[i] / c for i in range(len(prob_res))}
@@ -93,12 +95,13 @@ class MMC(object):
 
         return SGO
 
+
     def calculate_probabilities(self, sgo):
         n = defaultdict(lambda: defaultdict(float))
 
         for i, lag in enumerate(self.X_train):
-            s = self.find_high(lag, sgo)
-            if s is not None:
+            s = self.find_high(lag, self.index_dict)
+            if s is not float('-inf'):
                 n[s][self.y_train[i]] += 1
             else:
                 pass
@@ -143,7 +146,10 @@ class MMC(object):
 
     @staticmethod
     def create_index_dict(sgo):
-        return {s: i for i, s in enumerate(sgo)}
+        index = defaultdict(lambda: float('inf'))
+        for i, s in enumerate(sgo):
+            index[s] = i
+        return index
 
     def find_SGO_greedy(self):
         states_to_check = set(self.states) - {-1}
@@ -164,11 +170,10 @@ class MMC(object):
             n = defaultdict(lambda: defaultdict(float))
 
             for i, lag in enumerate(self.X_train):
-                s = self.find_high(lag, index_dict, SGO)
+                s = self.find_high(lag, index_dict)
                 if s in states_to_check:
                     for st in lag:
                         n[st][self.y_train[i]] += 1
-            print("done")
             # In the case all the data already has a high state
             if len(n) == 0:
                 for s in states_to_check:
@@ -297,12 +302,12 @@ class MMC(object):
     def test(self, X_test, y_test):
 
         return sum([1 for i, lag in enumerate(X_test)
-                    if self.argmax((self.cpt[self.find_high(lag, self.SGO)]))
+                    if self.argmax((self.cpt[self.find_high(lag, self.index_dict)]))
                         == y_test[i]]) \
                / len(y_test)
 
     def test_sample(self, X_test, y_test):
-        pred = [choice(self.state_size, 1, p=self.cpt[self.find_high(lag, self.SGO)])[0] for i, lag in
+        pred = [choice(self.state_size, 1, p=self.cpt[self.find_high(lag, self.index_dict)])[0] for i, lag in
                 enumerate(X_test)]
         return sum([1 for i in range(len(y_test)) if pred[i] == y_test[i]]) / len(y_test)
 # %%
