@@ -278,7 +278,7 @@ class MMC(object):
         if len(SGOs) > 1:
             sgo_results.sort(key=lambda x: x[0], reverse=True)
             self.index_dict = self.create_index_dict(sgo_results[0][1])
-        print(sgo_results)
+        #print(sgo_results)
         self.cpt = sgo_results[0][2]
         self.build_cpt()
         self.SGO = sgo_results[0][1]
