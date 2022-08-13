@@ -6,9 +6,10 @@ from Models.model_sources.mtd_source import MTD
 
 from Datasets import Blocksworld_Data
 
-#from Datasets.Markov_Data import HMM_Data
+from Datasets.Markov_Data import HMM_Data
 
 from Datasets.MMC_Data import MMC_data
+from Datasets.Markov_Data_Large import HMM_Decisive
 from Datasets.Fruit_Data import fruit_domain
 import matplotlib.pyplot as plt
 
@@ -27,8 +28,8 @@ order = 3
 sgo_type = "greedy"
 methods = [MMC, HMC, FMC, MTD]
 types = [m.__name__ for m in methods]
-#dataset = Blocksworld_Data.blocks
 dataset = MMC_data
+#dataset = HMM_Decisive
 
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
