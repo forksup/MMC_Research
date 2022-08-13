@@ -29,7 +29,7 @@ class MMC(object):
         self.index_dict = {}
 
     @staticmethod
-    def find_high(lag, index_dict = None):
+    def find_high(lag, index_dict):
         return min(lag, key=lambda x: index_dict[x])
         #return min(lag, key=lambda x: self.index_dict[x])
 
@@ -204,6 +204,7 @@ class MMC(object):
         sgo_results = []
         for SGO in SGOs:
             if len(SGOs) == 1:
+                self.index_dict = self.create_index_dict(SGO)
                 count_dict, n = self.calculate_probabilities(SGO)
                 sgo_results.append((-1, SGO, deepcopy(n)))
             else:
@@ -274,11 +275,13 @@ class MMC(object):
                 for key in n:
                     print(sum(n[key].values()))
             """
-        sgo_results.sort(key=lambda x: x[0], reverse=True)
+        if len(SGOs) > 1:
+            sgo_results.sort(key=lambda x: x[0], reverse=True)
+            self.index_dict = self.create_index_dict(sgo_results[0][1])
+
         self.cpt = sgo_results[0][2]
         self.SGO = sgo_results[0][1]
         self.build_cpt()
-        self.index_dict = self.create_index_dict(self.SGO)
         if self.verbose:
             print("SGO Found")
             print(self.SGO)
