@@ -79,14 +79,15 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str):
             ax.fill_between(x, [d - st_dev[i] for i, d in enumerate(y)], [d + st_dev[i] for i, d in enumerate(y)],
                             alpha=.2, edgecolor='#3F7F4C', facecolor=colors[types.index(method)],
                             linewidth=0)
-            ax.set_xlabel("State Space Size")
+            ax.set_xlabel("State Space Size", fontsize=15)
 
             if "accuracy" in metric:
-                ax.set_ylabel("Prediction Accuracy")
+                ax.set_ylabel("Prediction Accuracy %", fontsize=15)
             else:
-                ax.set_ylabel("Time")
+                ax.set_ylabel("Time (s)", fontsize=15)
+        break
 
-    ax.set_title(title)
+    ax.set_title(title, fontsize=15)
     ax.legend()
 
 
