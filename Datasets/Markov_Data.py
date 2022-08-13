@@ -11,7 +11,8 @@ class HMM_Data(object):
     @staticmethod
     def gen_data(state_size, order, size, verbose=False):
         cg = ChainGenerator(tuple(ascii_letters[:state_size]), order=order, min_len= order, max_len= order)
-        print(cg.transition_matrix)
+        if verbose:
+            print(cg.transition_matrix)
         x, y = cg.generate_data(size, random_state=datetime.now().second)
         pe = PathEncoder(order)
         pe.fit(x, y)

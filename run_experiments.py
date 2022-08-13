@@ -64,7 +64,7 @@ def find_average(arr):
     return sum(arr) / len(arr)
 
 
-def plot_data(x, title, metric: str, ax, colors: str):
+def plot_data(x, data_results, title, metric: str, ax, colors: str):
     for key in data_results:
         for method in data_results[key]:
             y = []
@@ -124,12 +124,12 @@ def run_experiment(methods, data_size_args, state_size_args, amount_to_average, 
                     threads.append(thread)
                     thread.start()
                     if not runthreads:
-                        thread.join()
+                        thread.join(timeout=999999)
                     # acc_train, time_train = MarkovChain.calculate_time(model.train, args_training)
                     # acc_test, time_test = MarkovChain.calculate_time(model.test, args_testing)
                 for i in range(len(threads)):
                     bar.update(bar.currval + 1)
-                    threads[i].join()
+                    threads[i].join(timeout=999999)
 
                 for i in range(len(threads)):
                     # 0 is train

@@ -18,18 +18,18 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-amount_to_average = 3
+amount_to_average = 1
 
 training_master = []
 testing_master = []
 
 state_count = 7
-order = 3
+order = 4
 sgo_type = "greedy"
 methods = [MMC, HMC, FMC, MTD]
 types = [m.__name__ for m in methods]
 dataset = MMC_data
-#dataset = HMM_Decisive
+dataset = Blocksworld_Data.blocks
 
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
@@ -81,8 +81,8 @@ def create_bar_graph(data, title):
 
 
 
-create_bar_graph({types[i]: acc_training[i] for i in range(len(acc_training))}, "Training Accuracy")
-create_bar_graph({types[i]: acc_testing[i] for i in range(len(acc_testing))}, "Testing Accuracy")
-create_bar_graph({types[i]: training_times[i] for i in range(len(training_times))}, "Training Times")
+#create_bar_graph({types[i]  acc_training[i] for i in range(len(acc_training))}, "Training Accuracy")
+#create_bar_graph({types[i]: acc_testing[i] for i in range(len(acc_testing))}, "Testing Accuracy")
+#create_bar_graph({types[i]: training_times[i] for i in range(len(training_times))}, "Training Times")
 
 #%%
