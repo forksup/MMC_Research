@@ -94,9 +94,7 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str):
 # data_size_args( initial value, max value, step)
 def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_test, data_size_args=None,  state_size_args=None, order_size_args=None):
 
-    print("Beginning experiment")
     data_results = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
-
     total_iterations = amount_to_average * len(methods)
     #total_iterations = len(range(*data_size_args)) * len(range(*state_size_args)) * amount_to_average * len(methods)
     sgo_type = None

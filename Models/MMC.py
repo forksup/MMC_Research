@@ -286,7 +286,7 @@ class MMC(object):
             print("SGO Found")
             print(self.SGO)
             print(self.cpt)
-        return self.test(X_train, y_train)
+        return None
 
     def build_cpt(self):
         l = []
