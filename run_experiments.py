@@ -97,17 +97,22 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
     print("Beginning experiment")
     data_results = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
-    total_iterations = len(range(*data_size_args)) * len(range(*state_size_args)) * amount_to_average * len(methods)
-    bar = progressbar.ProgressBar(maxval=total_iterations)
-    bar.start()
+    total_iterations = amount_to_average * len(methods)
+    #total_iterations = len(range(*data_size_args)) * len(range(*state_size_args)) * amount_to_average * len(methods)
     sgo_type = None
 
     if m_to_test == "order":
+        total_iterations *= len(range(*order_size_args))
         range_args = order_size_args
     elif m_to_test == "state_space":
+        total_iterations *= len(range(*state_size_args))
         range_args = state_size_args
     elif m_to_test == "data_size":
+        total_iterations *= len(range(*data_size_args))
         range_args = data_size_args
+
+    bar = progressbar.ProgressBar(maxval=total_iterations)
+    bar.start()
 
     for r_arg in range(*range_args):
 
