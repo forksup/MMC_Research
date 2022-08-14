@@ -15,7 +15,7 @@ class blocks(object):
 
     @staticmethod
     def gen_data(states, order, size, verbose=False):
-        dataset = "/Users/mbucklew/Downloads/thesis_research-master/Datasets/data_files/markovtraining_blocksworld.txt"
+        dataset = "Datasets/data_files/markovtraining_blocksworld.txt"
         data = pd.read_csv(dataset)
         state_set = set()
         state_keys = {}
