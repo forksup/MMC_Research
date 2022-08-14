@@ -80,8 +80,8 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str):
                             alpha=.2, edgecolor='#3F7F4C', facecolor=colors[types.index(method)],
                             linewidth=0)
             ax.set_xlabel("State Space Size", fontsize=15)
-
-            if "accuracy" in metric:
+            print(metric)
+            if "Accuracy" in metric:
                 ax.set_ylabel("Prediction Accuracy %", fontsize=15)
             else:
                 ax.set_ylabel("Time (s)", fontsize=15)
@@ -92,7 +92,7 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str):
 
 
 # data_size_args( initial value, max value, step)
-def run_experiment(methods, data_size_args, state_size_args, amount_to_average, data_generator, order, runthreads):
+def run_experiment(methods, amount_to_average, data_generator, order, runthreads, m_to_test, data_size_args=None,  state_size_args=None, order_size_args=None):
 
     print("Beginning experiment")
     data_results = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
@@ -101,12 +101,32 @@ def run_experiment(methods, data_size_args, state_size_args, amount_to_average, 
     bar = progressbar.ProgressBar(maxval=total_iterations)
     bar.start()
     sgo_type = None
-    for state_space_size in range(*state_size_args):
-        for data_size in range(*data_size_args):
+
+    if m_to_test == "order":
+        range_args = order_size_args
+    elif m_to_test == "state_space":
+        range_args = state_size_args
+    elif m_to_test == "data_size":
+        range_args = data_size_args
+
+    for r_arg in range(*range_args):
 
             d_to_average = [[[] for _ in range(len(metrics))] for _ in range(len(methods))]
 
             for e in range(amount_to_average):
+
+                if m_to_test == "data_size":
+                    data_size = r_arg
+                    state_space_size = state_size_args
+                    order = order_size_args
+                elif m_to_test == "state_space":
+                    data_size = data_size_args
+                    state_space_size=r_arg
+                    order = order_size_args
+                else:
+                    order = r_arg
+                    data_size = data_size_args
+                    state_space_size = state_size_args
 
                 (X_train, X_test, y_train, y_test) = data_generator.gen_data(state_space_size, order, data_size)
 
@@ -144,7 +164,7 @@ def run_experiment(methods, data_size_args, state_size_args, amount_to_average, 
                         d_to_average[i][b].append(mm[b])
             for j, r in enumerate(d_to_average):
                 for jj in range(len(metrics)):
-                    data_results[state_space_size][types[j]][metrics[jj]].append(
+                    data_results[r_arg][types[j]][metrics[jj]].append(
                         (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
     # print("Minutes Taken:")
     # print((datetime.now() - start_time).total_seconds() // 60)
