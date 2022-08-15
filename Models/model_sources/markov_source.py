@@ -79,7 +79,7 @@ class MarkovChain(object):
 
     @staticmethod
     def convert_state(s):
-        return ''.join(str(x) for x in s)
+        return '.'.join(str(x) for x in s)
 
 
     def _update_transition_matrix(self, states_sequence, normalize=True):
