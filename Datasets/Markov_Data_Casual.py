@@ -13,8 +13,10 @@ class HMM_Casual(object):
     @staticmethod
     def gen_data(state_size, order, size, verbose=False):
         cg = ChainGenerator(tuple(ascii_letters[:state_size]), order=order, min_len= order, max_len= order)
-
+        # idx is sequence of states
+        # i is index in probability table
         for i, idx in enumerate(product(range(state_size), repeat=order)):
+
             for s in idx:
                 cg.transition_matrix[i][s] *= 10
 
