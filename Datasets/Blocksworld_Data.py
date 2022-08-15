@@ -46,4 +46,6 @@ class blocks(object):
             e = list(e)
             x.extend([e[i:i+order] for i in range(len(e)-order)])
             y.extend([e[i] for i in range(order, len(e))])
-        return train_test_split(np.asarray(x[:50000]), np.asarray(y[:50000])), len(state_keys)
+        if size > len(x):
+            print("warning dataset size is greater than available blocksworld data")
+        return train_test_split(np.asarray(x[:size]), np.asarray(y[:size])), len(state_keys)
