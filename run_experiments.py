@@ -97,6 +97,8 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
 
 # data_size_args( initial value, max value, step)
 def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_test, data_size_args=None,  state_size_args=None, order_size_args=None):
+    import matplotlib.pyplot as plt
+    colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
     types = [m.__name__ for m in methods]
     data_results = defaultdict(dd)
     total_iterations = amount_to_average * len(methods)
@@ -174,13 +176,25 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
                 for jj in range(len(metrics)):
                     data_results[r_arg][types[j]][metrics[jj]].append(
                         (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
-            plot_data()
+
+
+
+            fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
+            fig.suptitle(f'Data Type: {data_generator.__name__}')
+            for im, met in enumerate(metrics):
+                plot_data(list(range(*state_size_args)), data_results, met, met, axs[im], colors, m_to_test, types)
+
+            fig.show()
+            fig.savefig(f"experiment_results/{bar.currval/len(types)}.png")
+
+
             with open('experiment_results.pkl', 'wb') as f:
                 pickle.dump(data_results, f)
     # print("Minutes Taken:")
     # print((datetime.now() - start_time).total_seconds() // 60)
     print("Experiment completed")
     return data_results, sgo_type
+
 
 def load_and_plot(metric_to_test, metrics):
     with open('experiment_results.pkl', 'rb') as f:
@@ -193,7 +207,6 @@ def load_and_plot(metric_to_test, metrics):
             plot_data(list(res.keys()), res, met, met, axs[im], colors, metric_to_test)
 
         fig.show()
-        fig.savefig("graph2.png")
 
 #data_generator = Markov_Data.HMM_Data
 if __name__ == "__main__":
