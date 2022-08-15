@@ -31,13 +31,11 @@ import matplotlib.pyplot as plt
 
 plt.rcParams['figure.figsize'] = [20, 20]
 
-methods = [HMC,FMC, MMC, MTD]
-
 mr = []
 mt = []
 
 metrics = ["Testing Accuracy", "Training Times", " Testing Times"]
-types = [m.__name__ for m in methods]
+
 
 # creating the dataset
 def create_bar_graph(data, title):
@@ -178,6 +176,8 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
 
 #data_generator = Markov_Data.HMM_Data
 if __name__ == "__main__":
+    methods = [HMC,FMC, MMC, MTD]
+    types = [m.__name__ for m in methods]
     data_generator = Markov_Data_Large.HMM_Decisive
     data_size_args = 120000
     state_size_args = (10, 20, 1)
