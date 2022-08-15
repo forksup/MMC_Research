@@ -52,7 +52,7 @@ class MarkovChain(object):
         # creates a map of state and label
         # (necessary to recover state label in High Order MC)
         self.possible_states = {
-            j: i for i, j in
+            self.convert_state(j): i for i, j in
             enumerate(itertools.product(range(n_states), repeat=order))
         }
 
@@ -76,6 +76,11 @@ class MarkovChain(object):
             self.transition_matrix, norm="l1"
         )
 
+    @staticmethod
+    def convert_state(s):
+        return int(''.join(map(str, s)))
+
+
     def _update_transition_matrix(self, states_sequence, normalize=True):
         """
         Updates transition matrix with a single sequence of states
@@ -90,9 +95,11 @@ class MarkovChain(object):
         # convert the state into a row using the possible state dict
         # then convert the actual state to the column number
 
-        funct = tuple
+        funct = self.convert_state
+
+
         if isinstance(states_sequence[0][0], int) or isinstance(states_sequence[0][0], np.int64):
-            funct = lambda t: tuple([t])
+            funct = lambda t: self.convert_state([t])
 
         for x, y in zip(states_sequence[0], states_sequence[1]):
             self.transition_matrix[

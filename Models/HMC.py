@@ -18,5 +18,5 @@ class HMC(MarkovChain):
         return None
 
     def test(self, X_test, y_test):
-        results = [1 for i in range(len(X_test)) if np.argmax(self.transition_matrix[self.possible_states[tuple(X_test[i][-self.order:])]]) == y_test[i]]
+        results = [1 for i in range(len(X_test)) if np.argmax(self.transition_matrix[self.possible_states[MarkovChain.convert_state(X_test[i][-self.order:])]]) == y_test[i]]
         return sum(results) / len(X_test)
