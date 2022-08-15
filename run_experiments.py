@@ -181,10 +181,11 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
 
             fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
             fig.suptitle(f'Data Type: {data_generator.__name__}')
+            print(data_results)
             for im, met in enumerate(metrics):
                 plot_data(list(data_results.keys()), data_results, met, met, axs[im], colors, m_to_test, types)
 
-            fig.show()
+            #fig.show()
             fig.savefig(f"experiment_results/{bar.currval/len(types)}.png")
 
 
