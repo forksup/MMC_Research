@@ -62,7 +62,7 @@ def find_average(arr):
     return sum(arr) / len(arr)
 
 
-def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_test, types):
+def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_test, types, xlabel_size = 20, ylabel_size = 20, title_size = 20):
     for key in data_results:
         for method in data_results[key]:
             y = []
@@ -77,15 +77,15 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
             ax.fill_between(x, [d - st_dev[i] for i, d in enumerate(y)], [d + st_dev[i] for i, d in enumerate(y)],
                             alpha=.2, edgecolor='#3F7F4C', facecolor=colors[types.index(method)],
                             linewidth=0)
-            ax.set_xlabel(metric_to_test, fontsize=15)
+            ax.set_xlabel(metric_to_test, xlabel_size=15)
 
             if "Accuracy" in metric:
-                ax.set_ylabel("Prediction Accuracy %", fontsize=15)
+                ax.set_ylabel("Prediction Accuracy %", ylabel_size=20)
             else:
-                ax.set_ylabel("Time (s)", fontsize=15)
+                ax.set_ylabel("Time (s)", ylabel_size=20)
         break
 
-    ax.set_title(title, fontsize=15)
+    ax.set_title(title, fontsize=title_size)
     ax.legend()
 
 
