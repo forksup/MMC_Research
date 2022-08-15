@@ -67,7 +67,6 @@ def dd2():
 def find_average(arr):
     return sum(arr) / len(arr)
 
-
 def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_test, types, xlabel_size = 20, ylabel_size = 20, title_size = 20):
     for key in data_results:
         for method in data_results[key]:
@@ -83,16 +82,17 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
             ax.fill_between(x, [d - st_dev[i] for i, d in enumerate(y)], [d + st_dev[i] for i, d in enumerate(y)],
                             alpha=.2, edgecolor='#3F7F4C', facecolor=colors[types.index(method)],
                             linewidth=0)
-            ax.set_xlabel(metric_to_test, xlabel_size=15)
+            ax.set_xlabel(metric_to_test, xlabel_size=xlabel_size)
 
             if "Accuracy" in metric:
-                ax.set_ylabel("Prediction Accuracy %", ylabel_size=20)
+                ax.set_ylabel("Prediction Accuracy %", ylabel_size=ylabel_size)
             else:
-                ax.set_ylabel("Time (s)", ylabel_size=20)
+                ax.set_ylabel("Time (s)", ylabel_size=ylabel_size)
         break
 
     ax.set_title(title, fontsize=title_size)
     ax.legend()
+
 
 
 # data_size_args( initial value, max value, step)
@@ -174,13 +174,26 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
                 for jj in range(len(metrics)):
                     data_results[r_arg][types[j]][metrics[jj]].append(
                         (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
-            with open('test.txt', 'wb') as f:
+            plot_data()
+            with open('experiment_results.pkl', 'wb') as f:
                 pickle.dump(data_results, f)
     # print("Minutes Taken:")
     # print((datetime.now() - start_time).total_seconds() // 60)
     print("Experiment completed")
     return data_results, sgo_type
 
+def load_and_plot(metric_to_test, metrics):
+    with open('experiment_results.pkl', 'rb') as f:
+        res = pickle.load(f)
+
+        fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
+        #fig.suptitle(f'Data Type: {data_generator.__name__} Data Size: {list(data_size_args)[0]} SGO Type: {sgo_type}', fontsize=20)
+        colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
+        for im, met in enumerate(metrics):
+            plot_data(list(res.keys()), res, met, met, axs[im], colors, metric_to_test)
+
+        fig.show()
+        fig.savefig("graph2.png")
 
 #data_generator = Markov_Data.HMM_Data
 if __name__ == "__main__":
