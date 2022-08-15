@@ -64,7 +64,7 @@ def find_average(arr):
     return sum(arr) / len(arr)
 
 
-def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_test):
+def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_test, types):
     for key in data_results:
         for method in data_results[key]:
             y = []
