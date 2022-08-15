@@ -59,7 +59,7 @@ class MarkovChain(object):
 
         # allocate transition matrix
         self.transition_matrix = sparse.dok_matrix((
-            (len(self.possible_states), self.number_of_states)
+            (len(self.possible_states), self.order)
         ), dtype=np.float64)
 
     @staticmethod
