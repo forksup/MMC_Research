@@ -16,23 +16,22 @@ class HMM_Casual(object):
         # idx is sequence of states
         # i is index in probability table
         for i, idx in enumerate(product(range(state_size), repeat=order)):
-
             for s in idx:
+                # Loop through each state in collection of lag and multiple probability by 10
                 cg.transition_matrix[i][s] *= 10
 
+        # now simply normalize
         for s in range(len(cg.transition_matrix)):
             total = sum(cg.transition_matrix[s])
-            if total != 1:
-                for ss in range(len(cg.transition_matrix[s])):
-                    cg.transition_matrix[s][ss] /= total
+            for ss in range(len(cg.transition_matrix[s])):
+                cg.transition_matrix[s][ss] /= total
         if verbose:
             print(cg.transition_matrix)
-
-        # now normalize in case they do not sum to 1
 
         x, y = cg.generate_data(size, random_state=datetime.now().second)
         pe = PathEncoder(order)
         pe.fit(x, y)
 
         x_tr3, y_tr3 = pe.transform(x, y)
+
         return train_test_split(x_tr3, y_tr3)
