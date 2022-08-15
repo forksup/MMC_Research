@@ -178,7 +178,6 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
 
 #data_generator = Markov_Data.HMM_Data
 if __name__ == "__main__":
-
     data_generator = Markov_Data_Large.HMM_Decisive
     data_size_args = 120000
     state_size_args = (10, 20, 1)
@@ -193,7 +192,6 @@ if __name__ == "__main__":
 
 
     data_results, sgo_type = run_experiment(methods, avg_amt, data_generator, threading, metric_to_test, data_size_args, state_size_args, order_size_args)
-
 """
 
 for st in range(*state_size_args):

@@ -28,8 +28,8 @@ order = 4
 sgo_type = "greedy"
 methods = [HMC, FMC, MMC, FMC, MTD]
 types = [m.__name__ for m in methods]
-dataset = MMC_data
-#dataset = Blocksworld_Data.blocks
+#dataset = MMC_data
+dataset = Blocksworld_Data.blocks
 
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
