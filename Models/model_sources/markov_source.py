@@ -98,8 +98,8 @@ class MarkovChain(object):
         funct = self.convert_state
 
 
-        if isinstance(states_sequence[0][0], int) or isinstance(states_sequence[0][0], np.int64):
-            funct = lambda t: self.convert_state([t])
+        #if isinstance(states_sequence[0][0], int) or isinstance(states_sequence[0][0], np.int64):
+            #funct = lambda t: self.convert_state([t])
 
         for x, y in zip(states_sequence[0], states_sequence[1]):
             self.transition_matrix[
