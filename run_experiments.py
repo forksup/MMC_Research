@@ -1,4 +1,4 @@
-
+import pickle
 import threading
 import numpy as np
 from progressbar import progressbar
@@ -57,6 +57,12 @@ def train_then_test(model, args_train, args_test):
     test = MarkovChain.calculate_time(model.test, args_test)
     return train, test, model.name
 
+def dd():
+    return defaultdict(dd2)
+
+def dd2():
+    return defaultdict(list)
+
 
 def find_average(arr):
     return sum(arr) / len(arr)
@@ -92,7 +98,7 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
 # data_size_args( initial value, max value, step)
 def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_test, data_size_args=None,  state_size_args=None, order_size_args=None):
     types = [m.__name__ for m in methods]
-    data_results = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    data_results = defaultdict(dd)
     total_iterations = amount_to_average * len(methods)
     #total_iterations = len(range(*data_size_args)) * len(range(*state_size_args)) * amount_to_average * len(methods)
     sgo_type = None
@@ -168,6 +174,8 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
                 for jj in range(len(metrics)):
                     data_results[r_arg][types[j]][metrics[jj]].append(
                         (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
+            with open('test.txt', 'wb') as f:
+                pickle.dump(data_results, f)
     # print("Minutes Taken:")
     # print((datetime.now() - start_time).total_seconds() // 60)
     print("Experiment completed")

@@ -16,7 +16,7 @@ class HMM_Casual(object):
         # idx is sequence of states
         # i is index in probability table
         for i, idx in enumerate(product(range(state_size), repeat=order)):
-            for s in idx:
+            for s in set(idx):
                 # Loop through each state in collection of lag and multiple probability by 10
                 cg.transition_matrix[i][s] *= 10
 
