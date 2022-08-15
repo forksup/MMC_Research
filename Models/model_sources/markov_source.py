@@ -51,6 +51,7 @@ class MarkovChain(object):
         self.gap = 0
         # creates a map of state and label
         # (necessary to recover state label in High Order MC)
+
         self.possible_states = {
             self.convert_state(j): i for i, j in
             enumerate(itertools.product(range(n_states), repeat=order))
@@ -78,7 +79,7 @@ class MarkovChain(object):
 
     @staticmethod
     def convert_state(s):
-        return int(''.join(map(str, s)))
+        return str(''.join(map(str, s)))
 
 
     def _update_transition_matrix(self, states_sequence, normalize=True):

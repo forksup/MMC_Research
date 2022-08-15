@@ -10,7 +10,7 @@ from Models.DBN import FMC
 from datetime import datetime
 from collections import defaultdict
 from Models.model_sources.mtd_source import MTD
-from Datasets import Markov_Data, MMC_Data, Fruit_Data
+from Datasets import Markov_Data, MMC_Data, Fruit_Data, Markov_Data_Large
 
 from Datasets import MMC_Data, Fruit_Data
 from scipy import stats
@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 
 plt.rcParams['figure.figsize'] = [20, 20]
 
-methods = [MMC, MTD, HMC, FMC]
+methods = [HMC,FMC, MMC, MTD]
 
 mr = []
 mt = []
@@ -122,9 +122,10 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
                     data_size = r_arg
                     state_space_size = state_size_args
                     order = order_size_args
+
                 elif m_to_test == "state_space":
                     data_size = data_size_args
-                    state_space_size=r_arg
+                    state_space_size = r_arg
                     order = order_size_args
                 else:
                     order = r_arg
@@ -178,15 +179,20 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
 #data_generator = Markov_Data.HMM_Data
 if __name__ == "__main__":
 
-    data_generator = MMC_Data.MMC_data
-    order = 5
-    data_size_args = (120000, 120001, 10000)
-    state_size_args = (15, 20, 1)
-    avg_amt = 10
-    threading = False
-    data_results, sgo_type = run_experiment(methods, data_size_args, state_size_args, avg_amt, data_generator, order, threading)
+    data_generator = Markov_Data_Large.HMM_Decisive
+    data_size_args = 120000
+    state_size_args = (10, 20, 1)
+    order_size_args = 3
+    avg_amt = 5
+    threading = True
+
+    metric_to_test = "state_space"
+
+    # metrics we can test
+    # order, state_space, or data_size
 
 
+    data_results, sgo_type = run_experiment(methods, avg_amt, data_generator, threading, metric_to_test, data_size_args, state_size_args, order_size_args)
 
 """
 
