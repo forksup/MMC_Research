@@ -82,12 +82,12 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
             ax.fill_between(x, [d - st_dev[i] for i, d in enumerate(y)], [d + st_dev[i] for i, d in enumerate(y)],
                             alpha=.2, edgecolor='#3F7F4C', facecolor=colors[types.index(method)],
                             linewidth=0)
-            ax.set_xlabel(metric_to_test, xlabel_size=xlabel_size)
+            ax.set_xlabel(metric_to_test, fontsize=xlabel_size)
 
             if "Accuracy" in metric:
-                ax.set_ylabel("Prediction Accuracy %", ylabel_size=ylabel_size)
+                ax.set_ylabel("Prediction Accuracy %", fontsize=ylabel_size)
             else:
-                ax.set_ylabel("Time (s)", ylabel_size=ylabel_size)
+                ax.set_ylabel("Time (s)", fontsize=ylabel_size)
         break
 
     ax.set_title(title, fontsize=title_size)
