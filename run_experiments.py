@@ -181,7 +181,6 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
             if len(data_results) > 1:
                 fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
                 fig.suptitle(f'Data Type: {data_generator.__name__}')
-                print(data_results)
                 for im, met in enumerate(metrics):
                     plot_data(list(data_results.keys()), data_results, met, met, axs[im], colors, m_to_test, types)
 
