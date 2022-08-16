@@ -178,15 +178,15 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
                         (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
 
 
+            if len(data_results) > 1:
+                fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
+                fig.suptitle(f'Data Type: {data_generator.__name__}')
+                print(data_results)
+                for im, met in enumerate(metrics):
+                    plot_data(list(data_results.keys()), data_results, met, met, axs[im], colors, m_to_test, types)
 
-            fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
-            fig.suptitle(f'Data Type: {data_generator.__name__}')
-            print(data_results)
-            for im, met in enumerate(metrics):
-                plot_data(list(data_results.keys()), data_results, met, met, axs[im], colors, m_to_test, types)
-
-            #fig.show()
-            fig.savefig(f"experiment_results/{bar.currval/len(types)}.png")
+                #fig.show()
+                fig.savefig(f"experiment_results/{bar.currval/len(types)}.png")
 
 
             with open('experiment_results.pkl', 'wb') as f:
