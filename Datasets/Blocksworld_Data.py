@@ -14,15 +14,16 @@ from sklearn.model_selection import train_test_split
 class blocks(object):
 
     @staticmethod
-    def gen_data(states, order, size, verbose=False, drop_arms=False):
-        dataset = "Datasets/data_files/markovtraining_blocksworld.txt"
+    def gen_data(states, order, size, verbose=False, drop_arms=True):
+        dataset = "Datasets/data_files/6blocks"
         data = pd.read_csv(dataset)
         if drop_arms:
             columns_to_drop = []
-            for key in df.keys:
-                if "holding" or "arm" in key:
-                    columns_to_drop.append(key)
-            data = data.drop(columns_to_drop, axis=1, inplace=True)
+            for key in data.keys():
+                if "holding" in key or "arm" in key:
+                    #columns_to_drop.append(key)
+                    pass
+            data.drop(columns_to_drop, axis=1, inplace=True)
 
         state_set = set()
         state_keys = {}

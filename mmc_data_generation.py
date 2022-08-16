@@ -4,7 +4,7 @@ from Models.HMC import HMC
 from Models.DBN import FMC
 from Models.model_sources.mtd_source import MTD
 
-from Datasets import Blocksworld_Data
+from Datasets import Blocksworld_Data, Markov_Data_Casual
 
 from Datasets.Markov_Data import HMM_Data
 
@@ -23,20 +23,21 @@ amount_to_average = 1
 training_master = []
 testing_master = []
 
-state_count = 7
-order = 4
+state_count = 5
+order = 2
 sgo_type = "greedy"
-methods = [HMC, FMC, MMC, FMC, MTD]
+methods = [HMC, MMC, MTD]
 types = [m.__name__ for m in methods]
-#dataset = MMC_data
 dataset = Blocksworld_Data.blocks
 
+#dataset = Blocksworld_Data.blocks
+dataset_size = 5000
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:
-        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(state_count, order, 50000, True)  ## Fitting model
+        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(state_count, order, dataset_size, True)  ## Fitting model
     else:
-        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, 50000, True)  ## Fitting model
+        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size, True)  ## Fitting model
 
     args_training = {"X_train": X_train, "y_train": y_train}
     args_testing = {"X_test": X_test, "y_test": y_test}
@@ -49,8 +50,9 @@ for _ in range(amount_to_average):
         testing = MarkovChain.calculate_time(model.test, args_testing)[0]
 
         print(model.__class__.__name__)
-        print(f"Training: {training}")
+        #print(f"Training: {training}")
         print(f"Testing: {testing}")
+        print("")
 
         #print(m.__name__)
         #print(results_testing[-1],end="\n\n")
