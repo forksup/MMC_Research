@@ -25,6 +25,7 @@ class ThreadWithResult(threading.Thread):
 
 
 import sys
+
 sys.path.append("/mnt/watchandhelp/PycharmProjects/mtd-learn")
 
 import matplotlib.pyplot as plt
@@ -57,8 +58,10 @@ def train_then_test(model, args_train, args_test):
     test = MarkovChain.calculate_time(model.test, args_test)
     return train, test, model.name
 
+
 def dd():
     return defaultdict(dd2)
+
 
 def dd2():
     return defaultdict(list)
@@ -67,7 +70,9 @@ def dd2():
 def find_average(arr):
     return sum(arr) / len(arr)
 
-def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_test, types, xlabel_size = 20, ylabel_size = 20, title_size = 20):
+
+def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_test, types, xlabel_size=20,
+              ylabel_size=20, title_size=20):
     for key in data_results:
         for method in data_results[key]:
             y = []
@@ -94,15 +99,15 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
     ax.legend()
 
 
-
 # data_size_args( initial value, max value, step)
-def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_test, data_size_args=None,  state_size_args=None, order_size_args=None):
+def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_test, data_size_args=None,
+                   state_size_args=None, order_size_args=None):
     import matplotlib.pyplot as plt
     colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
     types = [m.__name__ for m in methods]
     data_results = defaultdict(dd)
     total_iterations = amount_to_average * len(methods)
-    #total_iterations = len(range(*data_size_args)) * len(range(*state_size_args)) * amount_to_average * len(methods)
+    # total_iterations = len(range(*data_size_args)) * len(range(*state_size_args)) * amount_to_average * len(methods)
     sgo_type = None
 
     if m_to_test == "order":
@@ -120,76 +125,74 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
 
     for r_arg in range(*range_args):
 
-            d_to_average = [[[] for _ in range(len(metrics))] for _ in range(len(methods))]
+        d_to_average = [[[] for _ in range(len(metrics))] for _ in range(len(methods))]
 
-            for e in range(amount_to_average):
+        for e in range(amount_to_average):
 
-                if m_to_test == "data_size":
-                    data_size = r_arg
-                    state_space_size = state_size_args
-                    order = order_size_args
+            if m_to_test == "data_size":
+                data_size = r_arg
+                state_space_size = state_size_args
+                order = order_size_args
 
-                elif m_to_test == "state_space":
-                    data_size = data_size_args
-                    state_space_size = r_arg
-                    order = order_size_args
-                else:
-                    order = r_arg
-                    data_size = data_size_args
-                    state_space_size = state_size_args
+            elif m_to_test == "state_space":
+                data_size = data_size_args
+                state_space_size = r_arg
+                order = order_size_args
+            else:
+                order = r_arg
+                data_size = data_size_args
+                state_space_size = state_size_args
 
-                (X_train, X_test, y_train, y_test) = data_generator.gen_data(state_space_size, order, data_size)
+            (X_train, X_test, y_train, y_test) = data_generator.gen_data(state_space_size, order, data_size)
 
-                args_training = {"X_train": X_train, "y_train": y_train}
-                args_testing = {"X_test": X_test, "y_test": y_test}
+            args_training = {"X_train": X_train, "y_train": y_train}
+            args_testing = {"X_test": X_test, "y_test": y_test}
 
-                threads = []
+            threads = []
 
-                for i, m in enumerate(methods):
-                    if "MMC" in m.__name__:
-                        if not sgo_type:
-                            sgo_type = m(state_space_size, order).sgom
+            for i, m in enumerate(methods):
+                if "MMC" in m.__name__:
+                    if not sgo_type:
+                        sgo_type = m(state_space_size, order).sgom
 
-                    thread = ThreadWithResult(target=train_then_test,
-                                              args=(m(state_space_size, order), args_training, args_testing))
-                    threads.append(thread)
-                    thread.start()
-                    if not runthreads:
-                        thread.join(timeout=999999)
-                    # acc_train, time_train = MarkovChain.calculate_time(model.train, args_training)
-                    # acc_test, time_test = MarkovChain.calculate_time(model.test, args_testing)
-                for i in range(len(threads)):
-                    bar.update(bar.currval + 1)
-                    threads[i].join(timeout=999999)
+                thread = ThreadWithResult(target=train_then_test,
+                                          args=(m(state_space_size, order), args_training, args_testing))
+                threads.append(thread)
+                thread.start()
+                if not runthreads:
+                    thread.join(timeout=999999)
+                # acc_train, time_train = MarkovChain.calculate_time(model.train, args_training)
+                # acc_test, time_test = MarkovChain.calculate_time(model.test, args_testing)
+            for i in range(len(threads)):
+                bar.update(bar.currval + 1)
+                threads[i].join(timeout=999999)
 
-                for i in range(len(threads)):
-                    # 0 is train
-                    # 1 is test
-                    # metrics = ["Testing Accuracy", "Training Times"," Testing Times"]
-                    mm = [threads[i].result[1][0],
-                          threads[i].result[0][1],
-                          threads[i].result[1][1]]
-                    # mm = [acc_test, time_train, time_test]
-                    for b in range(len(metrics)):
-                        d_to_average[i][b].append(mm[b])
-            for j, r in enumerate(d_to_average):
-                for jj in range(len(metrics)):
-                    data_results[r_arg][types[j]][metrics[jj]].append(
-                        (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
+            for i in range(len(threads)):
+                # 0 is train
+                # 1 is test
+                # metrics = ["Testing Accuracy", "Training Times"," Testing Times"]
+                mm = [threads[i].result[1][0],
+                      threads[i].result[0][1],
+                      threads[i].result[1][1]]
+                # mm = [acc_test, time_train, time_test]
+                for b in range(len(metrics)):
+                    d_to_average[i][b].append(mm[b])
+        for j, r in enumerate(d_to_average):
+            for jj in range(len(metrics)):
+                data_results[r_arg][types[j]][metrics[jj]].append(
+                    (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
 
+        if len(data_results) > 1:
+            fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
+            fig.suptitle(f'Data Type: {data_generator.__name__}')
+            for im, met in enumerate(metrics):
+                plot_data(list(data_results.keys()), data_results, met, met, axs[im], colors, m_to_test, types)
 
-            if len(data_results) > 1:
-                fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
-                fig.suptitle(f'Data Type: {data_generator.__name__}')
-                for im, met in enumerate(metrics):
-                    plot_data(list(data_results.keys()), data_results, met, met, axs[im], colors, m_to_test, types)
+            # fig.show()
+            fig.savefig(f"experiment_results/{bar.currval / len(types)}.png")
 
-                #fig.show()
-                fig.savefig(f"experiment_results/{bar.currval/len(types)}.png")
-
-
-            with open('experiment_results.pkl', 'wb') as f:
-                pickle.dump(data_results, f)
+        with open('experiment_results.pkl', 'wb') as f:
+            pickle.dump(data_results, f)
     # print("Minutes Taken:")
     # print((datetime.now() - start_time).total_seconds() // 60)
     print("Experiment completed")
@@ -201,22 +204,21 @@ def load_and_plot(metric_to_test, metrics):
         res = pickle.load(f)
 
         fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
-        #fig.suptitle(f'Data Type: {data_generator.__name__} Data Size: {list(data_size_args)[0]} SGO Type: {sgo_type}', fontsize=20)
+        # fig.suptitle(f'Data Type: {data_generator.__name__} Data Size: {list(data_size_args)[0]} SGO Type: {sgo_type}', fontsize=20)
         colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
         for im, met in enumerate(metrics):
             plot_data(list(res.keys()), res, met, met, axs[im], colors, metric_to_test)
 
         fig.show()
 
-#data_generator = Markov_Data.HMM_Data
+
 if __name__ == "__main__":
-    methods = [HMC,FMC, MMC, MTD]
-    types = [m.__name__ for m in methods]
+    methods = [HMC, FMC, MMC, MTD]
     data_generator = Markov_Data_Large.HMM_Decisive
     data_size_args = 120000
     state_size_args = (10, 20, 1)
     order_size_args = 3
-    avg_amt = 5
+    avg_amt = 30
     threading = True
 
     metric_to_test = "state_space"
@@ -224,8 +226,8 @@ if __name__ == "__main__":
     # metrics we can test
     # order, state_space, or data_size
 
-
-    data_results, sgo_type = run_experiment(methods, avg_amt, data_generator, threading, metric_to_test, data_size_args, state_size_args, order_size_args)
+    data_results, sgo_type = run_experiment(methods, avg_amt, data_generator, threading, metric_to_test, data_size_args,
+                                            state_size_args, order_size_args)
 """
 
 for st in range(*state_size_args):
@@ -283,4 +285,4 @@ pl.fill_between(x, y - error, y + error,
 
 pl.show()
 """
-#%%
+# %%
