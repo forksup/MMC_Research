@@ -7,13 +7,11 @@ from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
 from Models.HMC import HMC
 from Models.DBN import FMC
-from datetime import datetime
 from collections import defaultdict
 from Models.model_sources.mtd_source import MTD
 from Datasets import Markov_Data, MMC_Data, Fruit_Data, Markov_Data_Large
-
-from Datasets import MMC_Data, Fruit_Data
-from scipy import stats
+import sys
+import matplotlib.pyplot as plt
 
 
 class ThreadWithResult(threading.Thread):
@@ -23,12 +21,6 @@ class ThreadWithResult(threading.Thread):
 
         super().__init__(group=group, target=function, name=name, daemon=daemon)
 
-
-import sys
-
-sys.path.append("/mnt/watchandhelp/PycharmProjects/mtd-learn")
-
-import matplotlib.pyplot as plt
 
 plt.rcParams['figure.figsize'] = [20, 20]
 
@@ -99,9 +91,8 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
     ax.legend()
 
 
-# data_size_args( initial value, max value, step)
 def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_test, data_size_args=None,
-                   state_size_args=None, order_size_args=None):
+                   state_size_args=None, order_size_args=None, save_path="/storage/data/experiment_results.pkl"):
     import matplotlib.pyplot as plt
     colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
     types = [m.__name__ for m in methods]
@@ -180,21 +171,11 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
         for j, r in enumerate(d_to_average):
             for jj in range(len(metrics)):
                 data_results[r_arg][types[j]][metrics[jj]].append(
-                    (find_average(d_to_average[j][jj]), np.std(d_to_average[j][jj])))
+                    (d_to_average[j][jj], np.std(d_to_average[j][jj])))
 
-        if len(data_results) > 1:
-            fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
-            fig.suptitle(f'Data Type: {data_generator.__name__}')
-            for im, met in enumerate(metrics):
-                plot_data(list(data_results.keys()), data_results, met, met, axs[im], colors, m_to_test, types)
-
-            # fig.show()
-            fig.savefig(f"experiment_results/{bar.currval / len(types)}.png")
-
-        with open('experiment_results.pkl', 'wb') as f:
+        with open(save_path, 'wb') as f:
             pickle.dump(data_results, f)
-    # print("Minutes Taken:")
-    # print((datetime.now() - start_time).total_seconds() // 60)
+
     print("Experiment completed")
     return data_results, sgo_type
 
