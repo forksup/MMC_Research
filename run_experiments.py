@@ -70,6 +70,7 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
             y = []
             st_dev = []
 
+
             for kk in data_results:
                 y.append(data_results[kk][method][metric][0][0])
                 st_dev.append(data_results[kk][method][metric][0][1])
@@ -79,7 +80,6 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
             ax.fill_between(x, [d - st_dev[i] for i, d in enumerate(y)], [d + st_dev[i] for i, d in enumerate(y)],
                             alpha=.2, edgecolor='#3F7F4C', facecolor=colors[types.index(method)],
                             linewidth=0)
-            ax.set_xlabel(metric_to_test, fontsize=xlabel_size)
 
             if "Accuracy" in metric:
                 ax.set_ylabel("Prediction Accuracy %", fontsize=ylabel_size)
