@@ -93,12 +93,9 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
 
 def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_test, data_size_args=None,
                    state_size_args=None, order_size_args=None, save_path="/storage/data/experiment_results.pkl"):
-    import matplotlib.pyplot as plt
-    colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
     types = [m.__name__ for m in methods]
     data_results = defaultdict(dd)
     total_iterations = amount_to_average * len(methods)
-    # total_iterations = len(range(*data_size_args)) * len(range(*state_size_args)) * amount_to_average * len(methods)
     sgo_type = None
 
     if m_to_test == "order":
