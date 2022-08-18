@@ -24,9 +24,9 @@ training_master = []
 testing_master = []
 
 state_count = 5
-order = 2
+order = 3
 sgo_type = "greedy"
-methods = [HMC, MMC, MTD]
+methods = [HMC, MMC, FMC] #FMC]
 types = [m.__name__ for m in methods]
 dataset = Blocksworld_Data.blocks
 
@@ -35,9 +35,9 @@ dataset_size = 5000
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:
-        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(state_count, order, dataset_size, True)  ## Fitting model
+        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(state_count, order, dataset_size, False, True)  ## Fitting model
     else:
-        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size, True)  ## Fitting model
+        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size, False, True)  ## Fitting model
 
     args_training = {"X_train": X_train, "y_train": y_train}
     args_testing = {"X_test": X_test, "y_test": y_test}
@@ -46,11 +46,11 @@ for _ in range(amount_to_average):
 
     for m in methods:
         model = m(state_count, order=order)
-        training = MarkovChain.calculate_time(model.train, args_training)[0]
-        testing = MarkovChain.calculate_time(model.test, args_testing)[0]
+        training = MarkovChain.calculate_time(model.train, args_training)
+        testing = MarkovChain.calculate_time(model.test, args_testing)
 
         print(model.__class__.__name__)
-        #print(f"Training: {training}")
+        print(f"Training: {training}")
         print(f"Testing: {testing}")
         print("")
 

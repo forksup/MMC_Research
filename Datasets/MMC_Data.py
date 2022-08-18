@@ -45,8 +45,5 @@ class MMC_data(object):
         x = [data[i:i + order] for i in range(len(data) - order)]
         y = [data[i] for i in range(order, len(data))]
 
-        #preds = list(map(np.argmax,[cg.transition_matrix[MMC.MMC.find_high(x_, SGO)] for x_ in x]))
-        #print("Maximum Accuracy:")
-        #print(sum([1 for i in range(len(y)) if preds[i] == y[i]])/len(y))
         return train_test_split(np.asarray(x), np.asarray(y))
 

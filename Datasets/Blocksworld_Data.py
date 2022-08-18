@@ -1,4 +1,5 @@
 import math
+from collections import defaultdict
 from random import randint
 from datetime import datetime
 
@@ -29,15 +30,40 @@ class blocks(object):
             data.drop(columns_to_drop, axis=1, inplace=True)
 
         state_set = set()
+
+        # Limit dataset to certein goal states
+        end_states = defaultdict(list)
+        start = 0
+        for key, row in data.iterrows():
+            if row['on_b2'] == "end":
+                end_states[tuple(data.iloc[key-1])].append(data.iloc[start:key+1])
+                start = key+1
+
+        sizes = []
+        keys = []
+        for key, d in end_states.items():
+            sizes.append(len(d))
+            keys.append(key)
+        top_30 = random.choices(list(range(len(keys))),k=30)
+        #top_five = np.argpartition(sizes, -4)[-4:]
+
+        data_states = [[]]
+        all_data = []
+
+        for t in top_30:
+            all_data.extend(end_states[keys[t]])
+        data = pd.concat(all_data)
+
         state_keys = {}
         for key, row in data.iterrows():
             if not row['on_b2'] == "end":
                 state_set.add(tuple(row))
+
         count = 0
         for s in state_set:
             state_keys[s] = count
             count += 1
-        data_states = [[]]
+
         for key, row in data.iterrows():
             if not row['on_b2'] == "end":
                 data_states[-1].append(state_keys[tuple(row)])
