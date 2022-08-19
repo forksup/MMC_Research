@@ -7,7 +7,6 @@ from Models.model_sources.mtd_source import MTD
 from Datasets import Blocksworld_Data, Markov_Data_Casual
 
 from Datasets.Markov_Data import HMM_Data
-
 from Datasets.MMC_Data import MMC_data
 from Datasets.Markov_Data_Large import HMM_Decisive
 from Datasets.Fruit_Data import fruit_domain
@@ -30,7 +29,6 @@ methods = [HMC, MMC, FMC] #FMC]
 types = [m.__name__ for m in methods]
 dataset = Blocksworld_Data.blocks
 
-#dataset = Blocksworld_Data.blocks
 dataset_size = 5000
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
@@ -54,8 +52,6 @@ for _ in range(amount_to_average):
         print(f"Testing: {testing}")
         print("")
 
-        #print(m.__name__)
-        #print(results_testing[-1],end="\n\n")
     print(results_training)
     print(results_testing)
     training_master.append(results_training)
@@ -64,8 +60,6 @@ for _ in range(amount_to_average):
 
 def find_average(arr):
     return sum(arr) / len(arr)
-
-
 
 # creating the dataset
 def create_bar_graph(data, title):
@@ -81,10 +75,5 @@ def create_bar_graph(data, title):
     plt.title(title)
     plt.show()
 
-
-
-#create_bar_graph({types[i]  acc_training[i] for i in range(len(acc_training))}, "Training Accuracy")
-#create_bar_graph({types[i]: acc_testing[i] for i in range(len(acc_testing))}, "Testing Accuracy")
-#create_bar_graph({types[i]: training_times[i] for i in range(len(training_times))}, "Training Times")
 
 #%%

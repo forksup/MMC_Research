@@ -10,7 +10,6 @@ from Models.DBN import FMC
 from collections import defaultdict
 from Models.model_sources.mtd_source import MTD
 from Datasets import Markov_Data, MMC_Data, Fruit_Data, Markov_Data_Large
-import sys
 import matplotlib.pyplot as plt
 
 

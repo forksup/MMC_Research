@@ -16,6 +16,7 @@ class blocks(object):
 
     @staticmethod
     def gen_data(states, order, size, verbose=False, four_blocks=False, drop_arms=True):
+        noise = .2
         if four_blocks:
             dataset = "Datasets/data_files/markovtraining_blocksworld.txt"
         else:
