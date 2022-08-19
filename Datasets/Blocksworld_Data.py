@@ -81,7 +81,7 @@ class blocks(object):
             keys.append(key)
 
         # limit the dataset to 10 random ending goals
-        top_30 = random.choices(list(range(len(keys))),k=30)
+        top_30 = random.choices(list(range(len(keys))),k=10)
 
         data_states = [[]]
         all_data = []
