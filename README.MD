@@ -24,7 +24,7 @@ Models included in repository:
 
 | Models                                        |                 Description                 |
 |-----------------------------------------------|:-------------------------------------------:|
-| MMC                                           |                right-aligned                |
+| MMC                                           |              Max Markov Chain               |
 | [MTD](https://github.com/PiotrekGa/mtd-learn) | Generalized Mixture Transition Distribution |
 | FMC                                           |          First Order Markov Chain           | 
 | HMC                                           |           High Order Markov Chain           |

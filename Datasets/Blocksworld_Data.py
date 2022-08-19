@@ -16,7 +16,6 @@ class blocks(object):
 
     @staticmethod
     def gen_data(states, order, size, verbose=False, four_blocks=False, drop_arms=True):
-        noise = .2
         if four_blocks:
             dataset = "Datasets/data_files/markovtraining_blocksworld.txt"
         else:
@@ -25,6 +24,7 @@ class blocks(object):
         if drop_arms:
             columns_to_drop = []
             for key in data.keys():
+                # attempting to drop holding, arms, and action to make domain less deterministic
                 if "holding" in key or "arm" in key or "act" in key:
                     columns_to_drop.append(key)
                     pass
@@ -32,7 +32,7 @@ class blocks(object):
 
         state_set = set()
 
-        # Limit dataset to certein goal states
+        # Limit dataset to certain goal states
         end_states = defaultdict(list)
         start = 0
         for key, row in data.iterrows():
@@ -45,8 +45,9 @@ class blocks(object):
         for key, d in end_states.items():
             sizes.append(len(d))
             keys.append(key)
-        top_30 = random.choices(list(range(len(keys))),k=30)
-        #top_five = np.argpartition(sizes, -4)[-4:]
+
+        # limit the dataset to 10 random ending goals
+        top_30 = random.choices(list(range(len(keys))),k=10)
 
         data_states = [[]]
         all_data = []
