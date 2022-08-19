@@ -21,16 +21,12 @@ class ThreadWithResult(threading.Thread):
         super().__init__(group=group, target=function, name=name, daemon=daemon)
 
 
-plt.rcParams['figure.figsize'] = [20, 20]
-
 mr = []
 mt = []
 
 metrics = ["Testing Accuracy", "Training Times", " Testing Times"]
 
-
-# creating the dataset
-def create_bar_graph(data, title):
+def create_bar_graph(data, title, types):
     courses = data
     values = types
 
@@ -68,7 +64,6 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_te
         for method in data_results[key]:
             y = []
             st_dev = []
-
 
             for kk in data_results:
                 y.append(data_results[kk][method][metric][0][0])
@@ -146,10 +141,11 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
                                           args=(m(state_space_size, order), args_training, args_testing))
                 threads.append(thread)
                 thread.start()
+
                 if not runthreads:
                     thread.join(timeout=999999)
-                # acc_train, time_train = MarkovChain.calculate_time(model.train, args_training)
-                # acc_test, time_test = MarkovChain.calculate_time(model.test, args_testing)
+
+
             for i in range(len(threads)):
                 bar.update(bar.currval + 1)
                 threads[i].join(timeout=999999)
@@ -157,11 +153,10 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
             for i in range(len(threads)):
                 # 0 is train
                 # 1 is test
-                # metrics = ["Testing Accuracy", "Training Times"," Testing Times"]
                 mm = [threads[i].result[1][0],
                       threads[i].result[0][1],
                       threads[i].result[1][1]]
-                # mm = [acc_test, time_train, time_test]
+
                 for b in range(len(metrics)):
                     d_to_average[i][b].append(mm[b])
         for j, r in enumerate(d_to_average):
@@ -181,7 +176,6 @@ def load_and_plot(metric_to_test, metrics):
         res = pickle.load(f)
 
         fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
-        # fig.suptitle(f'Data Type: {data_generator.__name__} Data Size: {list(data_size_args)[0]} SGO Type: {sgo_type}', fontsize=20)
         colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
         for im, met in enumerate(metrics):
             plot_data(list(res.keys()), res, met, met, axs[im], colors, metric_to_test)
@@ -190,7 +184,10 @@ def load_and_plot(metric_to_test, metrics):
 
 
 if __name__ == "__main__":
+    # Select each model to be tested
     methods = [HMC, FMC, MMC, MTD]
+
+    # Supply the data generator reference. The Gen_data function will be used
     data_generator = Markov_Data_Large.HMM_Decisive
     data_size_args = 120000
     state_size_args = (10, 20, 1)
@@ -205,61 +202,3 @@ if __name__ == "__main__":
 
     data_results, sgo_type = run_experiment(methods, avg_amt, data_generator, threading, metric_to_test, data_size_args,
                                             state_size_args, order_size_args)
-"""
-
-for st in range(*state_size_args):
-    print("State Space", {st})
-    for m1, m2 in list(itertools.permutations(methods, 2)):
-        n1 = m1.__name__
-        n2 = m2.__name__
-        print(f"T-Test for {n1} & {n2}")
-        tstat, pval = stats.ttest_ind([s[0] for s in data_results[st][n1]['Testing Accuracy']], [s[0] for s in data_results[st][n2]['Testing Accuracy']])
-        print("t-value: ", tstat, " p-value: ", pval)
-
-fig, axs = plt.subplots(len(metrics), len(data_results), figsize=(20, 20))
-fig.suptitle(f'Data Type: {data_generator.__name__}', y=1.08)
-colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
-for plot_index, (state_key, d) in enumerate(data_results.items()):
-    for im, met in enumerate(metrics):
-        plot_data(list(range(*data_size_args)), d, met, met, axs[im], colors)
-
-fig.tight_layout()
-fig.show()
-
-# %lprun -f run_experiment run_experiment()
-from matplotlib import pyplot as pl
-
-pl.clf()
-
-x = np.linspace(0, 30, 100)
-y = np.sin(x) * 0.5
-pl.plot(x, y, '-k')
-
-x = np.linspace(0, 30, 30)
-y = np.sin(x / 6 * np.pi)
-error = np.random.normal(0.1, 0.02, size=y.shape) + .1
-y += np.random.normal(0, 0.1, size=y.shape)
-
-pl.plot(x, y, 'k', color='#CC4F1B')
-pl.fill_between(x, y - error, y + error,
-                alpha=0.5, edgecolor='#CC4F1B', facecolor='#FF9848')
-
-y = np.cos(x / 6 * np.pi)
-error = np.random.rand(len(y)) * 0.5
-y += np.random.normal(0, 0.1, size=y.shape)
-pl.plot(x, y, 'k', color='#1B2ACC')
-pl.fill_between(x, y - error, y + error,
-                alpha=0.2, edgecolor='#1B2ACC', facecolor='#089FFF',
-                linewidth=4, linestyle='dashdot', antialiased=True)
-
-y = np.cos(x / 6 * np.pi) + np.sin(x / 3 * np.pi)
-error = np.random.rand(len(y)) * 0.5
-y += np.random.normal(0, 0.1, size=y.shape)
-pl.plot(x, y, 'k', color='#3F7F4C')
-pl.fill_between(x, y - error, y + error,
-                alpha=1, edgecolor='#3F7F4C', facecolor='#7EFF99',
-                linewidth=0)
-
-pl.show()
-"""
-# %%
