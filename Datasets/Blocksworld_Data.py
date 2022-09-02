@@ -16,28 +16,95 @@ class blocks(object):
 
     @staticmethod
     def gen_data(states, order, size, verbose=False, four_blocks=False, drop_arms=False):
+
         if four_blocks:
-            dataset = "Datasets/data_files/markovtraining_blocksworld.txt"
+            dataset = "Datasets/data_files/4blocks-10goals"
         else:
             dataset = "Datasets/data_files/6blocks"
+        dataset = "Datasets/data_files/markovtraining_blocksworld.txt"
+
         data = pd.read_csv(dataset)
-        if drop_arms:
+
+        if True:
             columns_to_drop = []
             for key in data.keys():
                 # attempting to drop holding, arms, and action to make domain less deterministic
-                if "holding" in key or "arm" in key or "act" in key:
+                if "holding" in key or "arm" in key:
                     columns_to_drop.append(key)
                     pass
             data.drop(columns_to_drop, axis=1, inplace=True)
 
         state_set = set()
+        prev_index = 0
+        episodes = []
+        for i in data.loc[data['action'] == "end"].index:
+            episodes.append(data.iloc[prev_index:i])
+            prev_index = i+1
+
+
+        def combine_two_pds(pd1,pd2):
+                prob_to_continue = .7
+
+                start = randint(0,1)
+                indexleft = 0
+                indexright = 0
+
+                pd2 = pd2.rename(columns={key: key+"1" for key in pd2.keys()})
+                pds = [pd1,pd2]
+                left = []
+                right = []
+
+                def check_max(listobj,index):
+                    return increment_index(listobj, index) == index
+
+                def increment_index(listobj, index):
+                    if len(listobj)-1 == index:
+                        return index
+                    return index + 1
+
+                while indexleft < len(pd1) or indexright < len(pd2):
+                    left.append(indexleft)
+                    right.append(indexright)
+
+                    if check_max(pd2, indexright) and check_max(pd1, indexleft):
+                        break;
+                    if check_max(pd2, indexright):
+                        start = 0
+                    elif check_max(pd1, indexleft):
+                        start = 1
+                    elif random.random() > prob_to_continue:
+                        start = 1 - start
+
+                    if start:
+                        indexright += 1
+                    else:
+                        indexleft += 1
+
+                combined_df = pd.concat([pd1.iloc[left].reset_index(), pd2.iloc[right].reset_index()], axis=1)
+                columns = ["action", "action1"]
+                landr = [left, right]
+                for i in range(len(left)-1):
+
+                    for l in range(len(columns)):
+
+                        if landr[l][i] == landr[l][i+1]:
+                            combined_df.at[i,columns[l]] = np.NaN
+                return combined_df
+
+        collect = []
+        for i in range(len(data)-len(data)//2):
+            collect.append(combine_two_pds(episodes[randint(0,len(episodes)-1)], episodes[randint(0,len(episodes)-1)]))
+
+        data = pd.concat(collect)
 
         # Limit dataset to certain goal states
         end_states = defaultdict(list)
         start = 0
         b = 10
         transient_states = 2
-        columns_to_add = ["on_b","on-table_b", "clear_b"]
+        columns_to_add = ["on_b", "on-table_b", "clear_b"]
+
+        """
         for i in range(transient_states):
             for c in columns_to_add:
                 if "table" in c:
@@ -46,15 +113,20 @@ class blocks(object):
                     data[c+str(b+i)] = "null"
         stacked = False
         columns = {}
-
+        """
         def set_item(data, dictionary):
             for key in dictionary:
                 dictionary[key] = data[key]
 
-        for key, row in data.iterrows():
 
-            if random.random() > .5:
-                if stacked == False:
+        for key, row in data.iterrows():
+            """
+                    for i in data.loc[data['action'] == "end"].index:
+            prev_index = i+1
+            episodes.append(data.iloc[prev_index:i])"""
+            if random.random() > .7:
+                """
+                if not stacked:
                     block_to_stack = randint(0, transient_states-1)
                     base_block = 0
                     if block_to_stack == 0:
@@ -67,12 +139,15 @@ class blocks(object):
                 else:
                     stacked = False
                     columns = {}
+                """
 
             if row['on_b2'] == "end":
                 end_states[tuple(data.iloc[key-1])].append(data.iloc[start:key+1])
                 start = key+1
             else:
-                set_item(row, columns)
+                ...
+                #set_item(row, columns)
+        
 
         sizes = []
         keys = []
@@ -81,15 +156,16 @@ class blocks(object):
             keys.append(key)
 
         # limit the dataset to 10 random ending goals
-        top_30 = random.choices(list(range(len(keys))),k=10)
+        """
+        top_30 = random.choices(list(range(len(keys))),k=15)
 
         data_states = [[]]
         all_data = []
 
         for t in top_30:
             all_data.extend(end_states[keys[t]])
-        data = pd.concat(all_data)
-
+        data = data
+        """
         state_keys = {}
         for key, row in data.iterrows():
             if not row['on_b2'] == "end":
@@ -100,11 +176,15 @@ class blocks(object):
             state_keys[s] = count
             count += 1
 
+        data_states = [[]]
+
         for key, row in data.iterrows():
             if not row['on_b2'] == "end":
                 data_states[-1].append(state_keys[tuple(row)])
             else:
                 data_states.append([])
+
+
 
         x = []
         y = []

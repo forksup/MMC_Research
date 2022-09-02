@@ -29,7 +29,7 @@ methods = [HMC, MMC, FMC] #FMC]
 types = [m.__name__ for m in methods]
 dataset = Blocksworld_Data.blocks
 
-dataset_size = 5000
+dataset_size = 50000
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:

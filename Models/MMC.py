@@ -209,7 +209,7 @@ class MMC(object):
                 sgo_results.append((-1, SGO, deepcopy(n)))
             else:
                 sgo_results.append((self.gen_prob(count_dict, n), SGO, deepcopy(n)))
-            """
+
             genprobs = self.gen_prob_dict(count_dict, n)
             #self.cpt = n
             #self.build_cpt()
@@ -274,7 +274,7 @@ class MMC(object):
             if self.verbose:
                 for key in n:
                     print(sum(n[key].values()))
-            """
+
         if len(SGOs) > 1:
             sgo_results.sort(key=lambda x: x[0], reverse=True)
             self.index_dict = self.create_index_dict(sgo_results[0][1])
@@ -300,7 +300,8 @@ class MMC(object):
     def argmax(self, arr):
         return np.random.choice(np.argwhere(arr == np.amax(arr)).flatten(), size=1)[0]
 
-
+    def predict(self, X_test):
+        return [self.argmax((self.cpt[self.find_high(lag, self.index_dict)])) for i, lag in enumerate(X_test)]
 
     def test(self, X_test, y_test):
 

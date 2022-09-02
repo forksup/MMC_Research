@@ -28,15 +28,19 @@ Models included in repository:
 | [MTD](https://github.com/PiotrekGa/mtd-learn) | Generalized Mixture Transition Distribution |
 | FMC                                           |          First Order Markov Chain           | 
 | HMC                                           |           High Order Markov Chain           |
+| CAP                                           |              Capability Model               |
+| MAX Model                                     |          Combination of FMC MOdels          |
 
 Data Sources included in repository:
 
-| Methods     |                                   Description                                   |
-|-------------|:-------------------------------------------------------------------------------:|
-| MMC         |                   Data generated following the MMC assumption                   |
-| HMC         |                     Data generated from a random CPT table                      |
-| Causal HMC  | HMC however the appearance of a lag increases the probability of the same state | 
-| Large HMC   |          High probability HMC, one state is at least double all others          |
-| Fruit       |    Theoretical testing domain where states are connected with varying order     |
-| Blocksworld |      IPC domain of either 4 or 6 blocks depending on configuration options      |
+| Methods               |                                   Description                                   |
+|-----------------------|:-------------------------------------------------------------------------------:|
+| MMC                   |                   Data generated following the MMC assumption                   |
+| HMC                   |                     Data generated from a random CPT table                      |
+| Causal HMC            | HMC however the appearance of a lag increases the probability of the same state | 
+| Large HMC             |          High probability HMC, one state is at least double all others          |
+| Fruit                 |    Theoretical testing domain where states are connected with varying order     |
+| Blocksworld           |      IPC domain of either 4 or 6 blocks depending on configuration options      |
+| Depot                 |                                   IPC domain                                    |
+| Watch and Help Domain |                               Household Simulator                               |
 
