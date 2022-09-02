@@ -92,9 +92,10 @@ class blocks(object):
                 return combined_df
 
         collect = []
-        for i in range(len(data)-len(data)//2):
+        for i in range(len(data.loc[data['action'] == "end"])//2):
             collect.append(combine_two_pds(episodes[randint(0,len(episodes)-1)], episodes[randint(0,len(episodes)-1)]))
 
+        # here we need to enter end states 
         data = pd.concat(collect)
 
         # Limit dataset to certain goal states
