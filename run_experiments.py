@@ -9,7 +9,7 @@ from Models.HMC import HMC
 from Models.DBN import FMC
 from collections import defaultdict
 from Models.model_sources.mtd_source import MTD
-from Datasets import Markov_Data, MMC_Data, Fruit_Data, Markov_Data_Large
+from Datasets import Markov_Data, MMC_Data, Fruit_Data, Markov_Data_Large, Financial_Data
 import matplotlib.pyplot as plt
 
 
@@ -58,7 +58,7 @@ def find_average(arr):
     return sum(arr) / len(arr)
 
 
-def plot_data(x, data_results, title, metric: str, ax, colors: str, metric_to_test, types, xlabel_size=20,
+def plot_data(x, data_results, title, metric: str, ax, colors: str, types, xlabel_size=20,
               ylabel_size=20, title_size=20):
     for key in data_results:
         for method in data_results[key]:
@@ -171,14 +171,14 @@ def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_
     return data_results, sgo_type
 
 
-def load_and_plot(metric_to_test, metrics):
-    with open('experiment_results.pkl', 'rb') as f:
+def load_and_plot(metric_to_test, metrics, storage_path):
+    with open(storage_path, 'rb') as f:
         res = pickle.load(f)
 
         fig, axs = plt.subplots(len(metrics), 1, figsize=(20, 20))
         colors = ["#21d185", "#d1218b", "#0000FF", "#FFA500"]
         for im, met in enumerate(metrics):
-            plot_data(list(res.keys()), res, met, met, axs[im], colors, metric_to_test)
+            plot_data(list(res.keys()), res, met, met, axs[im], colors, types)
 
         fig.show()
 
@@ -186,19 +186,19 @@ def load_and_plot(metric_to_test, metrics):
 if __name__ == "__main__":
     # Select each model to be tested
     methods = [HMC, FMC, MMC, MTD]
-
+    types = [m.__name__ for m in methods]
     # Supply the data generator reference. The Gen_data function will be used
-    data_generator = Markov_Data_Large.HMM_Decisive
+    data_generator = Financial_Data.financial_data
     data_size_args = 120000
-    state_size_args = (10, 20, 1)
-    order_size_args = 3
-    avg_amt = 30
+    state_size_args = 1000
+    order_size_args = (2, 5, 1)
+    avg_amt = 1
     threading = True
 
-    metric_to_test = "state_space"
+    metric_to_test = "order"
 
     # metrics we can test
     # order, state_space, or data_size
 
     data_results, sgo_type = run_experiment(methods, avg_amt, data_generator, threading, metric_to_test, data_size_args,
-                                            state_size_args, order_size_args)
+                                            state_size_args, order_size_args, save_path="/home/mitch/DataspellProjects/thesis_research/storage.pkl")

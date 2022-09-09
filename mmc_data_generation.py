@@ -25,7 +25,7 @@ testing_master = []
 state_count = 5
 order = 3
 sgo_type = "greedy"
-methods = [HMC, MMC, FMC] #FMC]
+methods = [MMC, FMC,HMC] #FMC]
 types = [m.__name__ for m in methods]
 dataset = Blocksworld_Data.blocks
 
@@ -44,6 +44,7 @@ for _ in range(amount_to_average):
 
     for m in methods:
         model = m(state_count, order=order)
+        print(f"Start training for {model.__class__.__name__}")
         training = MarkovChain.calculate_time(model.train, args_training)
         testing = MarkovChain.calculate_time(model.test, args_testing)
 

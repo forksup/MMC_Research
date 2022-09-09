@@ -43,14 +43,14 @@ class blocks(object):
 
 
         def combine_two_pds(pd1,pd2):
-                prob_to_continue = .7
+                prob_to_continue = .3
 
                 start = randint(0,1)
                 indexleft = 0
                 indexright = 0
 
                 pd2 = pd2.rename(columns={key: key+"1" for key in pd2.keys()})
-                pds = [pd1,pd2]
+                pds = [pd1, pd2]
                 left = []
                 right = []
 
@@ -92,10 +92,10 @@ class blocks(object):
                 return combined_df
 
         collect = []
-        for i in range(len(data.loc[data['action'] == "end"])//2):
+        for i in range(600):
             collect.append(combine_two_pds(episodes[randint(0,len(episodes)-1)], episodes[randint(0,len(episodes)-1)]))
 
-        # here we need to enter end states 
+        # here we need to enter end states
         data = pd.concat(collect)
 
         # Limit dataset to certain goal states
@@ -195,9 +195,9 @@ class blocks(object):
             x.extend([e[i:i+order] for i in range(len(e)-order)])
             y.extend([e[i] for i in range(order, len(e))])
 
-        for i in range(len(y)):
-            if random.random() > .8:
-                y[i] = randint(0,max(y))
+        #for i in range(len(y)):
+            #if random.random() > .8:
+                #y[i] = randint(0,max(y))
         if size > len(x):
             print("warning dataset size is greater than available blocksworld data")
         return train_test_split(np.asarray(x[:size]), np.asarray(y[:size])), len(state_keys)
