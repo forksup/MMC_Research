@@ -1,6 +1,5 @@
 import numpy as np
 from Models.model_sources.chain_source import ChainGenerator
-import random
 from string import ascii_letters
 import time
 from numpy.random import choice
