@@ -1,0 +1,3 @@
+[submodule "mtd-learn"]
+	path = mtd-learn
+	url = https://github.com/PiotrekGa/mtd-learn
