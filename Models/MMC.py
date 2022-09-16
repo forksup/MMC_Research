@@ -138,7 +138,7 @@ class MMC(object):
 
     def gen_prob_dict(self, n, probs):
         result = defaultdict(dict)
-        prod = 1
+
         for kn, d in n.items():
             for key, value in d.items():
                 result[kn][key] = n[kn][key] * math.log(probs[kn][key]+1)
@@ -183,6 +183,8 @@ class MMC(object):
             s = max(n, key=func)
             index_dict[s] = len(SGO)
             SGO.append(s)
+            if s not in states_to_check:
+                raise Exception("State does not exist in states to check. Potentially incorrect amount of states provided")
             states_to_check.remove(s)
         SGO.append(states_to_check.pop())
         return SGO
@@ -278,7 +280,7 @@ class MMC(object):
         if len(SGOs) > 1:
             sgo_results.sort(key=lambda x: x[0], reverse=True)
             self.index_dict = self.create_index_dict(sgo_results[0][1])
-        #print(sgo_results)
+
         self.cpt = sgo_results[0][2]
         self.build_cpt()
         self.SGO = sgo_results[0][1]
@@ -310,8 +312,8 @@ class MMC(object):
                         == y_test[i]]) \
                / len(y_test)
 
-    def test_sample(self, X_test, y_test):
+    def test_sample(self, x_test, y_test):
         pred = [choice(self.state_size, 1, p=self.cpt[self.find_high(lag, self.index_dict)])[0] for i, lag in
-                enumerate(X_test)]
+                enumerate(x_test)]
         return sum([1 for i in range(len(y_test)) if pred[i] == y_test[i]]) / len(y_test)
 # %%

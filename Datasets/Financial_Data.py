@@ -51,4 +51,4 @@ class financial_data(object):
         x_tr, y_tr = pe.transform(x, y)
         div = round(len(x_tr)*.85)
         #(X_train, X_test, y_train, y_test) = train_test_split(x_tr, y_tr)
-        return x_tr[div:, :],x_tr[:div, :], y_tr[div:], y_tr[:div]
+        return x_tr[div:, :], x_tr[:div, :], y_tr[div:], y_tr[:div]

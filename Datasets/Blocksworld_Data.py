@@ -1,14 +1,9 @@
 import math
 from collections import defaultdict
 from random import randint
-from datetime import datetime
-
-from fastparquet import ParquetFile
 import pandas as pd
 import random
 import numpy as np
-from numpy.random import choice
-from Models import MMC
 from sklearn.model_selection import train_test_split
 
 
@@ -29,7 +24,7 @@ class blocks(object):
             columns_to_drop = []
             for key in data.keys():
                 # attempting to drop holding, arms, and action to make domain less deterministic
-                if "holding" in key or "arm" in key:
+                if "holding" in key or "arm" in key or "act" in key:
                     columns_to_drop.append(key)
                     pass
             data.drop(columns_to_drop, axis=1, inplace=True)
@@ -37,67 +32,67 @@ class blocks(object):
         state_set = set()
         prev_index = 0
         episodes = []
-        for i in data.loc[data['action'] == "end"].index:
+        for i in data.loc[data['clear_b1'] == "end"].index:
             episodes.append(data.iloc[prev_index:i])
-            prev_index = i+1
+            prev_index = i + 1
 
+        def combine_two_pds(pd1, pd2):
+            prob_to_continue = .3
 
-        def combine_two_pds(pd1,pd2):
-                prob_to_continue = .3
+            start = randint(0, 1)
+            indexleft = 0
+            indexright = 0
 
-                start = randint(0,1)
-                indexleft = 0
-                indexright = 0
+            pd2 = pd2.rename(columns={key: key + "1" for key in pd2.keys()})
+            pds = [pd1, pd2]
+            left = []
+            right = []
 
-                pd2 = pd2.rename(columns={key: key+"1" for key in pd2.keys()})
-                pds = [pd1, pd2]
-                left = []
-                right = []
+            def check_max(listobj, index):
+                return increment_index(listobj, index) == index
 
-                def check_max(listobj,index):
-                    return increment_index(listobj, index) == index
+            def increment_index(listobj, index):
+                if len(listobj) - 1 == index:
+                    return index
+                return index + 1
 
-                def increment_index(listobj, index):
-                    if len(listobj)-1 == index:
-                        return index
-                    return index + 1
+            while indexleft < len(pd1) or indexright < len(pd2):
+                left.append(indexleft)
+                right.append(indexright)
 
-                while indexleft < len(pd1) or indexright < len(pd2):
-                    left.append(indexleft)
-                    right.append(indexright)
+                if check_max(pd2, indexright) and check_max(pd1, indexleft):
+                    break;
+                if check_max(pd2, indexright):
+                    start = 0
+                elif check_max(pd1, indexleft):
+                    start = 1
+                elif random.random() > prob_to_continue:
+                    start = 1 - start
 
-                    if check_max(pd2, indexright) and check_max(pd1, indexleft):
-                        break;
-                    if check_max(pd2, indexright):
-                        start = 0
-                    elif check_max(pd1, indexleft):
-                        start = 1
-                    elif random.random() > prob_to_continue:
-                        start = 1 - start
+                if start:
+                    indexright += 1
+                else:
+                    indexleft += 1
 
-                    if start:
-                        indexright += 1
-                    else:
-                        indexleft += 1
+            combined_df = pd.concat([pd1.iloc[left].reset_index(), pd2.iloc[right].reset_index()], axis=1)
+            columns = ["action", "action1"]
+            landr = [left, right]
+            for i in range(len(left) - 1):
 
-                combined_df = pd.concat([pd1.iloc[left].reset_index(), pd2.iloc[right].reset_index()], axis=1)
-                columns = ["action", "action1"]
-                landr = [left, right]
-                for i in range(len(left)-1):
+                for l in range(len(columns)):
 
-                    for l in range(len(columns)):
+                    if landr[l][i] == landr[l][i + 1]:
+                        combined_df.at[i, columns[l]] = np.NaN
+            return combined_df
 
-                        if landr[l][i] == landr[l][i+1]:
-                            combined_df.at[i,columns[l]] = np.NaN
-                return combined_df
-
+        """
         collect = []
         for i in range(600):
             collect.append(combine_two_pds(episodes[randint(0,len(episodes)-1)], episodes[randint(0,len(episodes)-1)]))
 
         # here we need to enter end states
         data = pd.concat(collect)
-
+    """
         # Limit dataset to certain goal states
         end_states = defaultdict(list)
         start = 0
@@ -115,10 +110,10 @@ class blocks(object):
         stacked = False
         columns = {}
         """
+
         def set_item(data, dictionary):
             for key in dictionary:
                 dictionary[key] = data[key]
-
 
         for key, row in data.iterrows():
             """
@@ -143,12 +138,11 @@ class blocks(object):
                 """
 
             if row['on_b2'] == "end":
-                end_states[tuple(data.iloc[key-1])].append(data.iloc[start:key+1])
-                start = key+1
+                end_states[tuple(data.iloc[key - 1])].append(data.iloc[start:key + 1])
+                start = key + 1
             else:
                 ...
-                #set_item(row, columns)
-        
+                # set_item(row, columns)
 
         sizes = []
         keys = []
@@ -185,19 +179,21 @@ class blocks(object):
             else:
                 data_states.append([])
 
-
-
         x = []
         y = []
         for e in data_states:
-
             e = list(e)
-            x.extend([e[i:i+order] for i in range(len(e)-order)])
+            x.extend([e[i:i + order] for i in range(len(e) - order)])
             y.extend([e[i] for i in range(order, len(e))])
 
-        #for i in range(len(y)):
-            #if random.random() > .8:
-                #y[i] = randint(0,max(y))
+        x = np.asarray(x[:size])
+        y = np.asarray(y[:size])
+
+
+        for i in range(len(y)):
+            #x[i][-1] = y[randint(0, len(y) - 1)]
+            if random.random() > .7:
+                y[i] = y[randint(0, len(y) - 1)]
         if size > len(x):
             print("warning dataset size is greater than available blocksworld data")
-        return train_test_split(np.asarray(x[:size]), np.asarray(y[:size])), len(state_keys)
+        return train_test_split(x, y)

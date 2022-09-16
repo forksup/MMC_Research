@@ -1,21 +1,14 @@
 from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
-from Models.HMC import HMC
 from Models.DBN import FMC
-from Models.model_sources.mtd_source import MTD
 
 from Datasets import Blocksworld_Data, Markov_Data_Casual
 
-from Datasets.Markov_Data import HMM_Data
-from Datasets.MMC_Data import MMC_data
-from Datasets.Markov_Data_Large import HMM_Decisive
-from Datasets.Fruit_Data import fruit_domain
 import matplotlib.pyplot as plt
-
+import numpy as np
 import warnings
 
 warnings.filterwarnings("ignore")
-
 
 amount_to_average = 1
 
@@ -23,9 +16,9 @@ training_master = []
 testing_master = []
 
 state_count = 5
-order = 3
+order = 2
 sgo_type = "greedy"
-methods = [MMC, FMC,HMC] #FMC]
+methods = [MMC, FMC]#, HMC, MTD]  # FMC]
 types = [m.__name__ for m in methods]
 dataset = Blocksworld_Data.blocks
 
@@ -33,10 +26,11 @@ dataset_size = 50000
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:
-        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(state_count, order, dataset_size, False, True, True)  ## Fitting model
+        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size, False, True,
+                                                            True)  ## Fitting model
     else:
-        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size, False, True, True)  ## Fitting model
-
+        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size)  ## Fitting model
+    state_count = len(set(np.unique(X_train)) | set(y_train) | set(np.unique(X_test)) | set(y_test))
     args_training = {"X_train": X_train, "y_train": y_train}
     args_testing = {"X_test": X_test, "y_test": y_test}
     results_training = []
@@ -62,6 +56,7 @@ for _ in range(amount_to_average):
 def find_average(arr):
     return sum(arr) / len(arr)
 
+
 # creating the dataset
 def create_bar_graph(data, title):
     courses = list(data.keys())
@@ -76,5 +71,4 @@ def create_bar_graph(data, title):
     plt.title(title)
     plt.show()
 
-
-#%%
+# %%
