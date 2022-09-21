@@ -1,40 +1,36 @@
 from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
-from Models.HMC import HMC
-from Models.DBN import DBN
-from Models.model_sources.mtd_source import MTD
+from Models.DBN import FMC
 
-from Datasets import Blocksworld_Data
+from Datasets import Blocksworld_Data, Markov_Data_Casual
 
-#from Datasets.Markov_Data import HMM_Data
-
-from Datasets.MMC_Data import MMC_data
-from Datasets.Fruit_Data import fruit_domain
 import matplotlib.pyplot as plt
-
+import numpy as np
 import warnings
 
 warnings.filterwarnings("ignore")
 
-
-amount_to_average = 3
+amount_to_average = 1
 
 training_master = []
 testing_master = []
 
-state_count = 7
-order = 3
-sgo_type = "hillclimb"
-methods = [HMC, MMC, DBN, MTD]
+state_count = 5
+order = 2
+sgo_type = "greedy"
+methods = [MMC, FMC]#, HMC, MTD]  # FMC]
 types = [m.__name__ for m in methods]
 dataset = Blocksworld_Data.blocks
-#dataset = MMC_data
+
+dataset_size = 50000
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:
-        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(state_count, order, 50000, True)  ## Fitting model
+        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size, False, True,
+                                                            True)  ## Fitting model
     else:
-        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, 30000, True)  ## Fitting model
+        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size)  ## Fitting model
+    state_count = len(set(np.unique(X_train)) | set(y_train) | set(np.unique(X_test)) | set(y_test))
     args_training = {"X_train": X_train, "y_train": y_train}
     args_testing = {"X_test": X_test, "y_test": y_test}
     results_training = []
@@ -42,15 +38,15 @@ for _ in range(amount_to_average):
 
     for m in methods:
         model = m(state_count, order=order)
-        training = MarkovChain.calculate_time(model.train, args_training)[0]
-        testing = MarkovChain.calculate_time(model.test, args_testing)[0]
+        print(f"Start training for {model.__class__.__name__}")
+        training = MarkovChain.calculate_time(model.train, args_training)
+        testing = MarkovChain.calculate_time(model.test, args_testing)
 
         print(model.__class__.__name__)
         print(f"Training: {training}")
         print(f"Testing: {testing}")
+        print("")
 
-        #print(m.__name__)
-        #print(results_testing[-1],end="\n\n")
     print(results_training)
     print(results_testing)
     training_master.append(results_training)
@@ -59,7 +55,6 @@ for _ in range(amount_to_average):
 
 def find_average(arr):
     return sum(arr) / len(arr)
-
 
 
 # creating the dataset
@@ -76,8 +71,4 @@ def create_bar_graph(data, title):
     plt.title(title)
     plt.show()
 
-
-
-create_bar_graph({types[i]: acc_training[i] for i in range(len(acc_training))}, "Training Accuracy")
-create_bar_graph({types[i]: acc_testing[i] for i in range(len(acc_testing))}, "Testing Accuracy")
-create_bar_graph({types[i]: training_times[i] for i in range(len(training_times))}, "Training Times")
+# %%

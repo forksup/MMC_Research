@@ -366,7 +366,7 @@ class MTD(_ChainBase):
         self._n_parameters = (1 + self.order * (self._n_dimensions - 1)) * (self._n_dimensions - 1)
         self._calculate_aic()
         self._calculate_bic()
-        return self.test(original_X, original_y)
+        return None
 
     def test(self, X_test, y_test):
         acc = len([y for y,p in enumerate(self.predict(X_test[:, -self.order:])) if p == y_test[y]])/len(y_test)
