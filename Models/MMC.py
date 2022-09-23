@@ -18,7 +18,7 @@ class sgo_types(Enum):
 
 class MMC(object):
 
-    def __init__(self, state_size, order, sgo_method: sgo_types = sgo_types.greedy, verbose = False):
+    def __init__(self, state_size, order, sgo_method: sgo_types = sgo_types.greedy, verbose=True):
         self.sgom = sgo_method
         self.state_size = state_size
         self.states = [i for i in range(state_size)]
@@ -31,7 +31,7 @@ class MMC(object):
     @staticmethod
     def find_high(lag, index_dict):
         return min(lag, key=lambda x: index_dict[x])
-        #return min(lag, key=lambda x: self.index_dict[x])
+        # return min(lag, key=lambda x: self.index_dict[x])
 
     def geometric_mean(self):
         # use greedy for hillclimb
@@ -95,7 +95,6 @@ class MMC(object):
 
         return SGO
 
-
     def calculate_probabilities(self, sgo):
         n = defaultdict(lambda: defaultdict(float))
 
@@ -141,7 +140,7 @@ class MMC(object):
 
         for kn, d in n.items():
             for key, value in d.items():
-                result[kn][key] = n[kn][key] * math.log(probs[kn][key]+1)
+                result[kn][key] = n[kn][key] * math.log(probs[kn][key] + 1)
         return result
 
     @staticmethod
@@ -184,7 +183,8 @@ class MMC(object):
             index_dict[s] = len(SGO)
             SGO.append(s)
             if s not in states_to_check:
-                raise Exception("State does not exist in states to check. Potentially incorrect amount of states provided")
+                raise Exception(
+                    "State does not exist in states to check. Potentially incorrect amount of states provided")
             states_to_check.remove(s)
         SGO.append(states_to_check.pop())
         return SGO
@@ -213,9 +213,9 @@ class MMC(object):
                 sgo_results.append((self.gen_prob(count_dict, n), SGO, deepcopy(n)))
 
             genprobs = self.gen_prob_dict(count_dict, n)
-            #self.cpt = n
-            #self.build_cpt()
-            #print(self.cpt)
+            # self.cpt = n
+            # self.build_cpt()
+            # print(self.cpt)
 
             max_probs = defaultdict(float)
             for k, val in genprobs.items():
@@ -232,7 +232,9 @@ class MMC(object):
             if self.verbose:
                 print(SGO)
                 print(mis_alignment)
+
             for m in mis_alignment:
+
                 # Gather all probability values for all misalligned states
                 input_table = {s: count_dict[s] for s in m}
                 new_table = deepcopy(input_table)
@@ -240,31 +242,40 @@ class MMC(object):
                 # Combine all the cpt's
                 res = dict(sum((Counter(dict(x)) for x in input_table.values()), Counter()))
 
-                max_key = max(res, key=res.get)
-                max_prob = res[max_key] / sum(res.values())
-                rem = 1 - max_prob
                 for key in new_table:
+                    # find the key of the max value
+                    max_key = max(input_table[key], key=input_table[key].get)
+
+                    # find the max probability
+                    max_prob = input_table[key][max_key] / sum(res.values())
+                    rem = 1 - max_prob
+
+                    # set the value
                     new_table[key][max_key] = max_prob
                     running_sum = max_prob
                     tot = sum(new_table[key].values()) - running_sum
 
+                    # loop through all the rest of the items in descending order of probability
                     for k2 in dict(sorted(new_table[key].items(), key=lambda item: item[1], reverse=True)):
 
                         if k2 == max_key:
                             continue
 
                         if new_table[key][k2] == 0:
+                            # equally distribute the remdiner across 0 values
                             lval = [k3 for k3, v2 in count_dict[key].items() if v2 == 0]
                             probtoset = rem / len(lval)
                             for ktset in lval:
                                 new_table[key][ktset] = probtoset
                             break
 
-                        nns = (new_table[key][k2]/tot)*rem
+                        nns = (new_table[key][k2] / tot) * rem
                         if nns > max_prob:
                             nns = min(rem, max_prob)
+
                             rem -= nns
                             rem = max(rem, 0)
+
                             running_sum += nns
                             new_table[key][k2] = nns
                             tot = sum(new_table[key].values()) - running_sum
@@ -309,7 +320,7 @@ class MMC(object):
 
         return sum([1 for i, lag in enumerate(X_test)
                     if self.argmax((self.cpt[self.find_high(lag, self.index_dict)]))
-                        == y_test[i]]) \
+                    == y_test[i]]) \
                / len(y_test)
 
     def test_sample(self, x_test, y_test):
