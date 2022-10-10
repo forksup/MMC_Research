@@ -28,6 +28,12 @@ class HMM_Casual(object):
         if verbose:
             print(cg.transition_matrix)
 
+        probs = [(max(row), key) for key, row in enumerate(cg.transition_matrix)]
+        probs.sort(reverse=True)
+        SGO = [p[1] for p in probs]
+        print("SGO")
+        print(SGO)
+
         x, y = cg.generate_data(size, random_state=datetime.now().second)
         pe = PathEncoder(order)
         pe.fit(x, y)

@@ -1,39 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="paperspace@74.82.28.117:22 key" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="API">
+      <paths name="paperspace@74.82.28.117:22 key">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$/../mtd-learn" web="/" />
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="Backend">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$/../mtd-learn" web="/" />
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="Markov">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$/../mtd-learn" web="/" />
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="Markov (1)">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$/../mtd-learn" web="/" />
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/tmp/pycharm_project_309" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
     </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
   </component>
 </project>

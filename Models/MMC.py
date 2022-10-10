@@ -18,7 +18,7 @@ class sgo_types(Enum):
 
 class MMC(object):
 
-    def __init__(self, state_size, order, sgo_method: sgo_types = sgo_types.greedy, verbose=True):
+    def __init__(self, state_size, order, sgo_method: sgo_types = sgo_types.greedy, verbose=False):
         self.sgom = sgo_method
         self.state_size = state_size
         self.states = [i for i in range(state_size)]
@@ -120,13 +120,12 @@ class MMC(object):
     # this function creates a graph of each state in the SGO. misalignments are connected via edges
     # and states with no misalignmnts are independent nodes
     def combine_misalignments(self, l, sets):
-        for s in sets:
-            if l[0] in s or l[1] in s:
-                s.add(l[0])
-                s.add(l[1])
+        for i, s in enumerate(sets):
+            if l.intersection(s):
+                sets[i] = s.union(l)
                 return
         else:
-            sets.append(set(l))
+            sets.append(l)
 
     def gen_prob(self, n, probs):
         prod = 1
@@ -140,7 +139,7 @@ class MMC(object):
 
         for kn, d in n.items():
             for key, value in d.items():
-                result[kn][key] = n[kn][key] * math.log(probs[kn][key] + 1)
+                result[kn][key] = n[kn][key] * math.log(1+probs[kn][key])
         return result
 
     @staticmethod
@@ -191,6 +190,7 @@ class MMC(object):
 
     def train(self, X_train, y_train):
 
+        self.states = set().union(*[np.unique(X_train), np.unique(y_train)])
         self.X_train = X_train
         self.y_train = y_train
         SGOs = []
@@ -222,38 +222,67 @@ class MMC(object):
                 max_probs[k] = max(val.values())
 
             mis_alignment = []
-
+            # change this so we grab sgo from new data generation problem
+            # uncomment out this section 
             # Retrieve all combinations of any two states to check for misalignments
-            for l in list(itertools.combinations([s for s in self.states if s != -1], 2)):
-                a = SGO.index(l[1]) - SGO.index(l[0])
-                b = max_probs[l[0]] - max_probs[l[1]]
-                if np.sign(a) != np.sign(b):
-                    self.combine_misalignments(l, mis_alignment)
+            # misalignment in java code
+            # the remaining items
+            sgo_from_data = sorted(max_probs, key=max_probs.get, reverse=True)
+
+            i_fromdata = {s: sgo_from_data.index(s) for s in self.states}
+            i_fromsgo = {s: SGO.index(s) for s in self.states}
+
+            state_index = {s:i for s,i in enumerate(self.states)}
+
+            set1 = set(sgo_from_data)
+            mis_alignment1 = []
+            for i in range(len(i_fromdata) - 1):
+                if SGO[i] != sgo_from_data[i]:
+                    if i_fromsgo[SGO[i]] < i_fromdata[SGO[i]]:
+                        self.combine_misalignments(set(SGO[i:i_fromdata[SGO[i]]+1]), mis_alignment1)
+
+                    """
+                    set_diff = set1 - set(SGO[i_fromsgo[sgo_from_data[i]] :])
+                    if set_diff:
+                        self.combine_misalignments(set(set_diff).union({sgo_from_data[i]}), mis_alignment)
+                    """
+                set1.remove(sgo_from_data[i])
+
+
+            # all of the states inbetween where its suppoed to be are misaligned
             if self.verbose:
                 print(SGO)
                 print(mis_alignment)
 
-            for m in mis_alignment:
+            for m in mis_alignment1:
+                # combine the count of the maximum key for each probability value then divide that by the
+                # total occurences for every state
 
+                # max(count_dict[0], key=count_dict[0].get)
+                # [max(count_dict[k], key=count_dict[k].get) for k in count_dict]
                 # Gather all probability values for all misalligned states
                 input_table = {s: count_dict[s] for s in m}
-                new_table = deepcopy(input_table)
+                new_table = {}
+
 
                 # Combine all the cpt's
                 res = dict(sum((Counter(dict(x)) for x in input_table.values()), Counter()))
+                max_values = [max(input_table[key].values()) for key in input_table]
+
+                max_prob = sum(max_values) / sum(res.values())
 
                 for key in new_table:
+
                     # find the key of the max value
                     max_key = max(input_table[key], key=input_table[key].get)
 
-                    # find the max probability
-                    max_prob = input_table[key][max_key] / sum(res.values())
                     rem = 1 - max_prob
-
-                    # set the value
+                    tot = sum(new_table[key].values()) - new_table[key][max_key]
                     new_table[key][max_key] = max_prob
                     running_sum = max_prob
-                    tot = sum(new_table[key].values()) - running_sum
+
+                    for i in range(self.state_size):
+                        new_table[key][i] = input_table[key][i]
 
                     # loop through all the rest of the items in descending order of probability
                     for k2 in dict(sorted(new_table[key].items(), key=lambda item: item[1], reverse=True)):
@@ -262,6 +291,7 @@ class MMC(object):
                             continue
 
                         if new_table[key][k2] == 0:
+                            print("setting zero")
                             # equally distribute the remdiner across 0 values
                             lval = [k3 for k3, v2 in count_dict[key].items() if v2 == 0]
                             probtoset = rem / len(lval)
@@ -282,11 +312,16 @@ class MMC(object):
                         else:
                             running_sum += nns
                             new_table[key][k2] = nns
+                    if len(new_table) != self.state_size:
+                        print("length mismatch")
+                    if self.verbose:
+                            print(sum(new_table[key].values()))
                 for key in new_table:
-                    n[key] = new_table[key]
-            if self.verbose:
-                for key in n:
-                    print(sum(n[key].values()))
+                    n[key] = new_table
+
+        if self.verbose:
+            for key in n:
+                print(sum(n[key].values()))
 
         if len(SGOs) > 1:
             sgo_results.sort(key=lambda x: x[0], reverse=True)
@@ -316,12 +351,22 @@ class MMC(object):
     def predict(self, X_test):
         return [self.argmax((self.cpt[self.find_high(lag, self.index_dict)])) for i, lag in enumerate(X_test)]
 
-    def test(self, X_test, y_test):
+    def return_probs(self, lag):
+        state = self.find_high(lag, self.index_dict)
+        if state < len(self.cpt):
+            return self.cpt[self.find_high(lag, self.index_dict)]
+        else:
+            return [1/len(self.cpt) for _ in range(len(self.cpt))]
 
-        return sum([1 for i, lag in enumerate(X_test)
-                    if self.argmax((self.cpt[self.find_high(lag, self.index_dict)]))
-                    == y_test[i]]) \
-               / len(y_test)
+    def test(self, X_test, y_test):
+        res = []
+        for i, lag in enumerate(X_test):
+            high = self.find_high(lag, self.index_dict)
+            if high < len(self.cpt):
+                if self.argmax((self.cpt[high])) == y_test[i]:
+                    res.append(1)
+
+        return sum(res) / len(y_test)
 
     def test_sample(self, x_test, y_test):
         pred = [choice(self.state_size, 1, p=self.cpt[self.find_high(lag, self.index_dict)])[0] for i, lag in

@@ -1,12 +1,17 @@
+from collections import defaultdict
+
+from Models.HMC import HMC
 from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
 from Models.DBN import FMC
 
-from Datasets import Blocksworld_Data, Markov_Data_Casual
+from Datasets import Blocksworld_Data, Markov_Data_Casual, MMC_Data
 
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
+
+from Models.model_sources.mtd_source import MTD
 
 warnings.filterwarnings("ignore")
 
@@ -15,33 +20,71 @@ amount_to_average = 1
 training_master = []
 testing_master = []
 
-state_count = 5
-order = 2
+state_count = 10
+order = 3
 sgo_type = "greedy"
-methods = [MMC, FMC]#, HMC, MTD]  # FMC]
+methods = [FMC, MMC,] #HMC,] #MTD]  # FMC]
 types = [m.__name__ for m in methods]
-dataset = Blocksworld_Data.blocks
+dataset = Blocksworld_Data.blocks()
 
-dataset_size = 50000
-print(f"Dataset: {dataset.__name__}")
+dataset_size = 2500
+print(f"Dataset: {dataset.__class__.__name__}")
+print(f"Dataset Size: {dataset_size}")
+
+action_prediction = True
+
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:
         X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size, False, True,
                                                             True)  ## Fitting model
     else:
         X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size)  ## Fitting model
+
+
+    reverse_states = {v: k for k, v in dataset.state_keys.items()}
+
     state_count = len(set(np.unique(X_train)) | set(y_train) | set(np.unique(X_test)) | set(y_test))
     args_training = {"X_train": X_train, "y_train": y_train}
     args_testing = {"X_test": X_test, "y_test": y_test}
     results_training = []
     results_testing = []
-
+    first = True
     for m in methods:
         model = m(state_count, order=order)
         print(f"Start training for {model.__class__.__name__}")
         training = MarkovChain.calculate_time(model.train, args_training)
-        testing = MarkovChain.calculate_time(model.test, args_testing)
 
+        if action_prediction:
+            state_dict = model.states
+            pred_res = []
+            act_and_index = [(reverse_states[key][-1], key) for key, value in enumerate(state_dict)]
+
+            #drop_indexes = [key for key,value in state_dict.items() if "drop" in value]
+            #rise_indexes = [key for key,value in state_dict.items() if "rise" in value]
+
+            for lag, y in zip(X_test, y_test):
+                cpt_row = model.return_probs(lag)
+                action_dict = defaultdict(float)
+                for t in act_and_index:
+                    action_dict[t[0]] += cpt_row[t[1]]
+                if first:
+                    print("action")
+                    print(len(action_dict))
+                    first = False
+                """
+                prob_values = model.cpt[model.find_high(lag, model.index_dict)]
+                drop_prob = sum([prob_values[key] for key in drop_indexes])
+
+                if drop_prob >= .5:
+                    pred_res.append(drop_indexes[0])
+                else:
+                    pred_res.append(rise_indexes[0])
+                """
+                most_likely_action = max(action_dict, key=action_dict.get)
+                if most_likely_action == reverse_states[y][-1]:
+                    pred_res.append(1)
+        testing = MarkovChain.calculate_time(model.test, args_testing)
+        print(sum(pred_res)/len(y_test))
         print(model.__class__.__name__)
         print(f"Training: {training}")
         print(f"Testing: {testing}")

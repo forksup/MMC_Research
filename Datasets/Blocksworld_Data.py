@@ -2,49 +2,51 @@ import math
 from collections import defaultdict
 from random import randint
 import pandas as pd
+
 import random
 import numpy as np
 from sklearn.model_selection import train_test_split
 
 
 class blocks(object):
+    state_keys = {}
 
-    @staticmethod
-    def gen_data(states, order, size, verbose=False, four_blocks=False, drop_arms=False):
+    def gen_data(self, states, order, size, verbose=False, four_blocks=False, drop_arms=False):
 
         if four_blocks:
             dataset = "Datasets/data_files/4blocks-10goals"
         else:
             dataset = "Datasets/data_files/6blocks"
-        dataset = "Datasets/data_files/markovtraining_blocksworld.txt"
-
+        dataset = "Datasets/data_files/4blocks-10goals"
+        blocks = 4
         data = pd.read_csv(dataset)
 
         if True:
             columns_to_drop = []
             for key in data.keys():
                 # attempting to drop holding, arms, and action to make domain less deterministic
-                if "holding" in key or "arm" in key or "act" in key:
+                if "holding" in key or "arm" in key:
                     columns_to_drop.append(key)
                     pass
             data.drop(columns_to_drop, axis=1, inplace=True)
 
-        state_set = set()
         prev_index = 0
         episodes = []
         for i in data.loc[data['clear_b1'] == "end"].index:
-            episodes.append(data.iloc[prev_index:i])
+            # only add episodes with length greater than 1
+            if i - prev_index > 1:
+                episodes.append(data.iloc[prev_index:i])
             prev_index = i + 1
 
         def combine_two_pds(pd1, pd2):
-            prob_to_continue = .3
+            prob_to_continue = .7
 
             start = randint(0, 1)
             indexleft = 0
             indexright = 0
-
             pd2 = pd2.rename(columns={key: key + "1" for key in pd2.keys()})
-            pds = [pd1, pd2]
+            #rename blocks on right side
+            pd2 = pd2.replace({f'b{i}': f'b{blocks+i}' for i in range(1, blocks+1)}, regex=True)
             left = []
             right = []
 
@@ -73,26 +75,37 @@ class blocks(object):
                     indexright += 1
                 else:
                     indexleft += 1
-
+            # change this so there is one action column, change the blocks name
+            # blocks 1-4 on left and blocks 5-8 on right
+            # combine them to one action column
+            # let's do one action
             combined_df = pd.concat([pd1.iloc[left].reset_index(), pd2.iloc[right].reset_index()], axis=1)
-            columns = ["action", "action1"]
-            landr = [left, right]
-            for i in range(len(left) - 1):
+            combined_df = combined_df.reset_index()
+            columns = ["action"]
+            for i in range(1, len(combined_df)):
+                # left changes
+                # right changes
+                if right[i] == right[i-1] or right[i] == max(right):
+                    combined_df.at[i,'action'] = pd1.iloc[left[i]]['action']
+                else:
+                    combined_df.at[i,'action'] = pd2.iloc[right[i]]['action1']
 
-                for l in range(len(columns)):
+            return combined_df.drop('index', axis=1)
 
-                    if landr[l][i] == landr[l][i + 1]:
-                        combined_df.at[i, columns[l]] = np.NaN
-            return combined_df
 
-        """
+        print("genning data randomly")
         collect = []
-        for i in range(600):
-            collect.append(combine_two_pds(episodes[randint(0,len(episodes)-1)], episodes[randint(0,len(episodes)-1)]))
+        for i in range(size):
+            episode1 = randint(0, len(episodes)-1)
+            episode2 = randint(0, len(episodes)-1)
+            for _ in range(20):
+                collect.append(combine_two_pds(episodes[episode1], episodes[episode2]))
 
         # here we need to enter end states
         data = pd.concat(collect)
-    """
+        data.to_csv("/home/paperspace/output.csv")
+        #data = pd.read_csv("/home/paperspace/output.csv")
+        #data = data.iloc[0:10000]
         # Limit dataset to certain goal states
         end_states = defaultdict(list)
         start = 0
@@ -161,24 +174,20 @@ class blocks(object):
             all_data.extend(end_states[keys[t]])
         data = data
         """
-        state_keys = {}
-        for key, row in data.iterrows():
-            if not row['on_b2'] == "end":
-                state_set.add(tuple(row))
-
-        count = 0
-        for s in state_set:
-            state_keys[s] = count
-            count += 1
-
         data_states = [[]]
-
+        count = 0
         for key, row in data.iterrows():
             if not row['on_b2'] == "end":
-                data_states[-1].append(state_keys[tuple(row)])
+                conv = tuple(row)
+                if conv not in self.state_keys:
+                    self.state_keys[conv] = count
+                    count += 1
+
+                data_states[-1].append(self.state_keys[conv])
             else:
                 data_states.append([])
-
+        print("State Size")
+        print(count)
         x = []
         y = []
         for e in data_states:
@@ -191,9 +200,10 @@ class blocks(object):
 
 
         for i in range(len(y)):
-            #x[i][-1] = y[randint(0, len(y) - 1)]
+            x[i][-1] = y[randint(0, len(y) - 1)]
             if random.random() > .7:
                 y[i] = y[randint(0, len(y) - 1)]
+
         if size > len(x):
             print("warning dataset size is greater than available blocksworld data")
         return train_test_split(x, y)
