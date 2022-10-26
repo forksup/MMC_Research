@@ -67,7 +67,7 @@ class MarkovChain(object):
         time = datetime.datetime.now()
         res = function(**args)
         duration = (datetime.datetime.now() - time).total_seconds()
-        return (res, duration)
+        return res, duration
 
     def normalize_transitions(self):
         """

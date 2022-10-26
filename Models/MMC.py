@@ -27,6 +27,7 @@ class MMC(object):
         self.name = "MMC"
         self.verbose = verbose
         self.index_dict = {}
+        self.misalignment = False
 
     @staticmethod
     def find_high(lag, index_dict):
@@ -234,25 +235,30 @@ class MMC(object):
 
             state_index = {s:i for s,i in enumerate(self.states)}
 
+
             set1 = set(sgo_from_data)
             mis_alignment1 = []
-            for i in range(len(i_fromdata) - 1):
-                if SGO[i] != sgo_from_data[i]:
-                    if i_fromsgo[SGO[i]] < i_fromdata[SGO[i]]:
-                        self.combine_misalignments(set(SGO[i:i_fromdata[SGO[i]]+1]), mis_alignment1)
 
-                    """
-                    set_diff = set1 - set(SGO[i_fromsgo[sgo_from_data[i]] :])
-                    if set_diff:
-                        self.combine_misalignments(set(set_diff).union({sgo_from_data[i]}), mis_alignment)
-                    """
-                set1.remove(sgo_from_data[i])
+            print(f"Combine misalignment: {self.misalignment}")
+            if self.misalignment:
+                for i in range(len(i_fromdata) - 1):
+                    if SGO[i] != sgo_from_data[i]:
+                        if i_fromsgo[SGO[i]] < i_fromdata[SGO[i]]:
+                            self.combine_misalignments(set(SGO[i:i_fromdata[SGO[i]]+1]), mis_alignment1)
 
+                        """
+                        set_diff = set1 - set(SGO[i_fromsgo[sgo_from_data[i]] :])
+                        if set_diff:
+                            self.combine_misalignments(set(set_diff).union({sgo_from_data[i]}), mis_alignment)
+                        """
+                    set1.remove(sgo_from_data[i])
 
             # all of the states inbetween where its suppoed to be are misaligned
             if self.verbose:
-                print(SGO)
-                print(mis_alignment)
+
+                print(f"SGO: {SGO}")
+                print(f"{mis_alignment}")
+
 
             for m in mis_alignment1:
                 # combine the count of the maximum key for each probability value then divide that by the
@@ -292,7 +298,7 @@ class MMC(object):
 
                         if new_table[key][k2] == 0:
                             print("setting zero")
-                            # equally distribute the remdiner across 0 values
+                            # equally distribute the remainder across 0 values
                             lval = [k3 for k3, v2 in count_dict[key].items() if v2 == 0]
                             probtoset = rem / len(lval)
                             for ktset in lval:
