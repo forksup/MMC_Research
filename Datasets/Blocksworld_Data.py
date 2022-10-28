@@ -12,7 +12,7 @@ class blocks(object):
     state_keys = {}
 
     def gen_data(self, states, order, size, verbose=False, four_blocks=False, drop_arms=False):
-        load_data = True
+        load_data = False
 
         if four_blocks:
             dataset = "Datasets/data_files/4blocks-10goals"
@@ -114,7 +114,7 @@ class blocks(object):
 
             print("Generating Data Randomly")
             collect = []
-            for i in range(size):
+            for _ in range(size):
                 episode1 = randint(0, len(episodes)-1)
                 episode2 = randint(0, len(episodes)-1)
                 for _ in range(40):

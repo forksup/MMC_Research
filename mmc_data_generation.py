@@ -25,7 +25,7 @@ order = 3
 sgo_type = "greedy"
 methods = [FMC, MMC, ]  # HMC,] #MTD]  # FMC]
 types = [m.__name__ for m in methods]
-dataset = Blocksworld_Data.blocks
+dataset = Blocksworld_Data.blocks()
 
 dataset_size = 2500
 print(f"Dataset: {dataset.__class__.__name__}")
