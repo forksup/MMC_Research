@@ -119,7 +119,7 @@ class blocks(object):
                 episode2 = randint(0, len(episodes)-1)
                 for _ in range(40):
                     collect.append(combine_two_pds(episodes[episode1], episodes[episode2]))
-
+            print(f"Dataset Size: {len(collect)}")
             # here we need to enter end states
             data = pd.concat(collect)
             data.to_csv(f"{dataset}.csv")

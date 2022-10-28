@@ -5,7 +5,7 @@ from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
 from Models.DBN import FMC
 
-from Datasets import Blocksworld_Data, Markov_Data_Casual, MMC_Data
+from Datasets import Blocksworld_Data, Markov_Data_Casual, MMC_Data, watch_and_help
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,11 +25,10 @@ order = 3
 sgo_type = "greedy"
 methods = [FMC, MMC, ]  # HMC,] #MTD]  # FMC]
 types = [m.__name__ for m in methods]
-dataset = Blocksworld_Data.blocks()
+dataset = Blocksworld_Data.blocks
 
 dataset_size = 2500
 print(f"Dataset: {dataset.__class__.__name__}")
-print(f"Episode Size: {dataset_size*40}")
 # upload
 action_prediction = True
 
@@ -40,14 +39,17 @@ for _ in range(amount_to_average):
     else:
         X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size)  ## Fitting model
 
+    print(f"Dataset Size: {len(X_train) + len(y_train)}")
+
     reverse_states = {v: k for k, v in dataset.state_keys.items()}
     actions = set()
     action_index = 0
     for t in reverse_states:
         actions.add(reverse_states[t][action_index])
 
-    print(f"Actions: {actions}")
-    print(f"Action Size: {len(actions)}")
+    if action_prediction:
+        print(f"Actions: {actions}")
+        print(f"Action Size: {len(actions)}")
 
     state_count = len(set(np.unique(X_train)) | set(y_train) | set(np.unique(X_test)) | set(y_test))
     args_training = {"X_train": X_train, "y_train": y_train}
@@ -60,6 +62,7 @@ for _ in range(amount_to_average):
         #print(f"Start training for {model.__class__.__name__}")
         training = MarkovChain.calculate_time(model.train, args_training)
 
+        # Specifically for blocksworld
         if action_prediction:
             state_dict = model.states
             pred_res = []
@@ -81,10 +84,10 @@ for _ in range(amount_to_average):
                 if most_likely_action == reverse_states[y][action_index]:
                     pred_res.append(1)
         testing = MarkovChain.calculate_time(model.test, args_testing)
-        action_pred = sum(pred_res) / len(y_test)
         print()
         print(model.__class__.__name__)
-        print(f"Action Prediction: {round(action_pred*100)}%")
+        if action_prediction:
+            print(f"Action Prediction: {round(sum(pred_res) / len(y_test)*100)}%")
         print(f"Training: {round(training[0]*100,2)+'%' if training[0] else 'Na'} {round(training[1],2)}s")
         print(f"Testing: {round(testing[0]*100,2)}% {round(testing[1],2)}s")
         print("")
