@@ -25,12 +25,12 @@ order = 3
 sgo_type = "greedy"
 methods = [FMC, MMC, ]  # HMC,] #MTD]  # FMC]
 types = [m.__name__ for m in methods]
-dataset = Blocksworld_Data.blocks()
+dataset = watch_and_help.watchandhelp()
 
 dataset_size = 2500
 print(f"Dataset: {dataset.__class__.__name__}")
 # upload
-action_prediction = True
+action_prediction = False
 
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:
@@ -40,7 +40,11 @@ for _ in range(amount_to_average):
         X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size)  ## Fitting model
 
     print(f"Dataset Size: {len(X_train) + len(y_train)}")
+    all_states = set(np.unique(X_train)) | set(y_train) | set(np.unique(X_test)) | set(y_test)
+    state_count = len(all_states)
+    print(f"State Count {state_count}")
 
+    state_count = max(all_states)+1
     reverse_states = {v: k for k, v in dataset.state_keys.items()}
     actions = set()
     action_index = 0
@@ -51,7 +55,7 @@ for _ in range(amount_to_average):
         print(f"Actions: {actions}")
         print(f"Action Size: {len(actions)}")
 
-    state_count = len(set(np.unique(X_train)) | set(y_train) | set(np.unique(X_test)) | set(y_test))
+
     args_training = {"X_train": X_train, "y_train": y_train}
     args_testing = {"X_test": X_test, "y_test": y_test}
     results_training = []
@@ -63,7 +67,7 @@ for _ in range(amount_to_average):
         training = MarkovChain.calculate_time(model.train, args_training)
 
         # Specifically for blocksworld
-        if action_prediction:
+        if action_prediction and dataset == Blocksworld_Data.blocks:
             state_dict = model.states
             pred_res = []
             act_and_index = [(reverse_states[key][0], key) for key, value in enumerate(state_dict)]
