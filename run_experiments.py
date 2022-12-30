@@ -3,6 +3,7 @@ import threading
 import numpy as np
 from progressbar import progressbar
 import argparse
+import pandas as pd
 from scipy import stats
 from tabulate import tabulate
 from Models.model_sources.markov_source import MarkovChain
