@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class Inflation_Data(object):
+class inflationData(object):
 
     @staticmethod
     def load_data():
