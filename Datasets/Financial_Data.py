@@ -12,8 +12,7 @@ class financial_data(object):
         interval = "1h"
         symbol = "ETH-USD"
         def get_crypto_price(symbol, exchange,interval, start_date = None):
-            api_key = 'QEUZDNSCRV22B7VL'
-            api_url = f'https://eodhistoricaldata.com/api/intraday/{symbol}.CC?api_token=630d712fd8bd74.01254339&interval={interval}&fmt=json'
+            api_url = f'https://eodhistoricaldata.com/api/intraday/{symbol}.CC?api_token=&interval={interval}&fmt=json'
             raw_df = requests.get(api_url).json()
             df = pd.DataFrame(raw_df)
             df['close'] = df['close'].astype(float)

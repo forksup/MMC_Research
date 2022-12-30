@@ -47,35 +47,28 @@ def train_then_test(model, args_train, args_test):
     test = MarkovChain.calculate_time(model.test, args_test)
     return train, test, model.name
 
+
 def perform_ttest(methods, x, latex=False):
     method_perms = []
     for m in methods:
         if m != MMC:
             method_perms.append((MMC, m))
 
-    headers = [f"{m1.__name__}-{m2.__name__}" for m1, m2 in method_perms]
+    t_test = {}
 
-    t_test = [headers, []]
+    for m1, m2 in method_perms:
+        n1 = m1.__name__
+        n2 = m2.__name__
+        # print(f"T-Test for {n1} & {n2}")
+        print()
+        tstat, pval = stats.ttest_rel(x[n1], x[n2])
 
-    for st in x:
-        for m1, m2 in method_perms:
-            n1 = m1.__name__
-            n2 = m2.__name__
-            # print(f"T-Test for {n1} & {n2}")
-            tstat, pval = stats.ttest_rel(x[st][n1]['Testing Accuracy'][0][0], x[st][n2]['Testing Accuracy'][0][0])
+        t_test[f"{m1.__name__}-{m2.__name__}"] = [pval]
 
-            if round(pval, 3) == 0:
-                t_test[-1].append("0.000")
-            else:
-                t_test[-1].append(round(pval, 3))
-        t_test.append([])
-        t_test.pop(-1)
+    print(t_test)
+    result_df = pd.DataFrame(t_test)
 
-        if latex:
-            print(tabulate(t_test, headers="firstrow", tablefmt="latex"))
-        else:
-            print(tabulate(t_test, headers="firstrow"))
-
+    return result_df
 
 def dd():
     return defaultdict(dd2)
