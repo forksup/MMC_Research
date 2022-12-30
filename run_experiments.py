@@ -66,7 +66,6 @@ def perform_ttest(methods, x, latex=False):
 
         t_test[f"{m1.__name__}-{m2.__name__}"] = [pval]
 
-    print(t_test)
     result_df = pd.DataFrame(t_test)
 
     return result_df
