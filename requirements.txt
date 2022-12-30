@@ -1,0 +1,6 @@
+progressbar
+numpy
+pandas
+argparse
+scipy
+tabulate

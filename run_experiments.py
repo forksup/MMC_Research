@@ -2,7 +2,9 @@ import pickle
 import threading
 import numpy as np
 from progressbar import progressbar
-
+import argparse
+from scipy import stats
+from tabulate import tabulate
 from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
 from Models.HMC import HMC
@@ -45,6 +47,35 @@ def train_then_test(model, args_train, args_test):
     test = MarkovChain.calculate_time(model.test, args_test)
     return train, test, model.name
 
+def perform_ttest(methods, x, latex=False):
+    method_perms = []
+    for m in methods:
+        if m != MMC:
+            method_perms.append((MMC, m))
+
+    headers = [f"{m1.__name__}-{m2.__name__}" for m1, m2 in method_perms]
+
+    t_test = [headers, []]
+
+    for st in x:
+        for m1, m2 in method_perms:
+            n1 = m1.__name__
+            n2 = m2.__name__
+            # print(f"T-Test for {n1} & {n2}")
+            tstat, pval = stats.ttest_rel(x[st][n1]['Testing Accuracy'][0][0], x[st][n2]['Testing Accuracy'][0][0])
+
+            if round(pval, 3) == 0:
+                t_test[-1].append("0.000")
+            else:
+                t_test[-1].append(round(pval, 3))
+        t_test.append([])
+        t_test.pop(-1)
+
+        if latex:
+            print(tabulate(t_test, headers="firstrow", tablefmt="latex"))
+        else:
+            print(tabulate(t_test, headers="firstrow"))
+
 
 def dd():
     return defaultdict(dd2)
@@ -85,6 +116,7 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, types, xlabe
     ax.legend()
 
 
+# This function will accept a metric and 
 def run_experiment(methods, amount_to_average, data_generator, runthreads, m_to_test, data_size_args=None,
                    state_size_args=None, order_size_args=None, save_path="/storage/data/experiment_results.pkl"):
     types = [m.__name__ for m in methods]
@@ -184,9 +216,23 @@ def load_and_plot(metric_to_test, metrics, storage_path):
 
 
 if __name__ == "__main__":
-    # Select each model to be tested
+    parser = argparse.ArgumentParser()
+
     methods = [HMC, FMC, MMC, MTD]
     types = [m.__name__ for m in methods]
+
+    #type_dict = {m.__name__: method for m in methods}
+
+    parser.add_argument('--methods', type=list)
+
+    parser.add_argument("--all", action=argparse.BooleanOptionalAction)
+
+    parser.add_argument('--meth',
+                        choices=types,
+                        help='M')
+
+    # Select each model to be tested
+
     # Supply the data generator reference. The Gen_data function will be used
     data_generator = Financial_Data.financial_data
     data_size_args = 120000
