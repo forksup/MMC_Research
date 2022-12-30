@@ -60,8 +60,9 @@ def perform_ttest(methods, x, latex=False):
     for m1, m2 in method_perms:
         n1 = m1.__name__
         n2 = m2.__name__
-        # print(f"T-Test for {n1} & {n2}")
-        print()
+        if n1 == n2:
+            continue
+
         tstat, pval = stats.ttest_rel(x[n1], x[n2])
 
         t_test[f"{m1.__name__}-{m2.__name__}"] = [pval]
