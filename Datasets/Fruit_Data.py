@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
-from fastparquet import ParquetFile
 import pandas as pd
 class fruit_domain(object):
 

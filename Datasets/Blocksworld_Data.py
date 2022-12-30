@@ -11,14 +11,15 @@ from sklearn.model_selection import train_test_split
 class blocks(object):
     state_keys = {}
 
-    def gen_data(self, states, order, size, verbose=False, four_blocks=False, drop_arms=False):
+    @staticmethod
+    def gen_data(states, order, size, verbose=False, four_blocks=False, drop_arms=False):
         load_data = False
 
         if four_blocks:
             dataset = "Datasets/data_files/4blocks-10goals"
         else:
             dataset = "Datasets/data_files/6blocks"
-        dataset = "Datasets/data_files/blocksworld_4blocks.txt"
+        dataset =  "Datasets/data_files/6blocks"
 
         if load_data:
             data = pd.read_csv(f"{dataset}.csv")
@@ -50,11 +51,11 @@ class blocks(object):
                 start = randint(0, 1)
                 indexleft = 0
                 indexright = 0
-                #rename blocks on right side
+                # rename blocks on right side
                 rename_dict = {}
                 for key in pd2.keys():
                     if key != "action":
-                        rename_dict[key] = key.split("_")[0] + f"_b{int(key.split('_')[1][1])+block_count}"
+                        rename_dict[key] = key.split("_")[0] + f"_b{int(key.split('_')[1][1]) + block_count}"
 
                 pd2 = pd2.rename(columns=rename_dict)
 
@@ -63,7 +64,7 @@ class blocks(object):
                     new_act = act
                     if isinstance(act, str) or not math.isnan(act):
                         for s in act.split("_")[1:]:
-                            new_act = new_act.replace(s[1], str(int(s[1])+block_count))
+                            new_act = new_act.replace(s[1], str(int(s[1]) + block_count))
                     rename_action_dict[act] = new_act
                 pd2['action'] = pd2['action'].replace(rename_action_dict)
                 left = []
@@ -104,19 +105,18 @@ class blocks(object):
                 for i in range(len(combined_df)):
                     # left changes
                     # right changes
-                    if right[i] == max(right) or right[i] == right[i+1] :
-                        combined_df.at[i,'action'] = pd1.iloc[left[i]]['action']
+                    if right[i] == max(right) or right[i] == right[i + 1]:
+                        combined_df.at[i, 'action'] = pd1.iloc[left[i]]['action']
                     else:
-                        combined_df.at[i,'action'] = pd2.iloc[right[i]]['action']
+                        combined_df.at[i, 'action'] = pd2.iloc[right[i]]['action']
                 combined_df = combined_df.drop('level_0', axis=1)
                 return combined_df.drop('index', axis=1)
-
 
             print("Generating Data Randomly")
             collect = []
             for _ in range(size):
-                episode1 = randint(0, len(episodes)-1)
-                episode2 = randint(0, len(episodes)-1)
+                episode1 = randint(0, len(episodes) - 1)
+                episode2 = randint(0, len(episodes) - 1)
                 for _ in range(40):
                     collect.append(combine_two_pds(episodes[episode1], episodes[episode2]))
             print(f"Dataset Size: {len(collect)}")
@@ -124,7 +124,7 @@ class blocks(object):
             data = pd.concat(collect)
             data.to_csv(f"{dataset}.csv")
 
-        #data = data.iloc[0:10000]
+        # data = data.iloc[0:10000]
         # Limit dataset to certain goal states
         try:
             data = data.drop('Unnamed: 0', axis=1)
@@ -147,32 +147,31 @@ class blocks(object):
         columns = {}
         """
 
-
         def set_item(data, dictionary):
             for key in dictionary:
                 dictionary[key] = data[key]
+
         """
         for key, row in data.iterrows():
-            
+
                     for i in data.loc[data['action'] == "end"].index:
             prev_index = i+1
             episodes.append(data.iloc[prev_index:i])
             if random.random() > .7:
-                
+
                 if not stacked:
                     block_to_stack = randint(0, transient_states-1)
                     base_block = 0
                     if block_to_stack == 0:
                         base_block = 1
                     stacked = True
-
                     columns["on_b"+str(b+base_block)] = "b"+str(b+block_to_stack)
                     columns["clear_b"+str(b+base_block)] = "False"
                     columns["on-table_b"+str(b+block_to_stack)] = "False"
                 else:
                     stacked = False
                     columns = {}
-                
+
             if row['on_b2'] == "end":
                 end_states[tuple(data.iloc[key - 1])].append(data.iloc[start:key + 1])
                 start = key + 1
@@ -190,11 +189,11 @@ class blocks(object):
         for key, row in data.iterrows():
             if not row['on_b2'] == "end":
                 conv = tuple(row)
-                if conv not in self.state_keys:
-                    self.state_keys[conv] = count
+                if conv not in state_keys:
+                    state_keys[conv] = count
                     count += 1
 
-                data_states[-1].append(self.state_keys[conv])
+                data_states[-1].append(state_keys[conv])
             else:
                 data_states.append([])
         print(f"State Size: {count}")
@@ -208,9 +207,9 @@ class blocks(object):
         x = np.asarray(x[:size])
         y = np.asarray(y[:size])
 
-        #test
+        # test
         noise = .20
-        print(f"Noise: {noise*100}%")
+        print(f"Noise: {noise * 100}%")
         for i in range(len(y)):
             x[i][-1] = y[randint(0, len(y) - 1)]
             if random.random() < noise:
@@ -218,4 +217,4 @@ class blocks(object):
 
         if size > len(x):
             print("warning dataset size is greater than available blocksworld data")
-        return train_test_split(x, y)
+        return train_test_split(x, y), len(self.state_keys)

@@ -27,7 +27,7 @@ class MMC(object):
         self.name = "MMC"
         self.verbose = verbose
         self.index_dict = {}
-        self.misalignment = False
+        self.misalignment = True
 
     @staticmethod
     def find_high(lag, index_dict):
@@ -239,7 +239,8 @@ class MMC(object):
             set1 = set(sgo_from_data)
             mis_alignment1 = []
 
-            print(f"Combine misalignment: {self.misalignment}")
+            if self.verbose:
+                print(f"Combine misalignment: {self.misalignment}")
             if self.misalignment:
                 for i in range(len(i_fromdata) - 1):
                     if SGO[i] != sgo_from_data[i]:

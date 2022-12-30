@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="thesis_research" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="Thesis Research" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
+      <paths name="Thesis Research">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/paperspace/thesis_research" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="thesis_research">
         <serverdata>
           <mappings>

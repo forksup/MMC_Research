@@ -1,61 +1,39 @@
-from collections import defaultdict
-
-from Models.HMC import HMC
 from Models.model_sources.markov_source import MarkovChain
 from Models.MMC import MMC
+from Models.HMC import HMC
 from Models.DBN import FMC
-
-from Datasets import Blocksworld_Data, Markov_Data_Casual, MMC_Data, watch_and_help
-
-import matplotlib.pyplot as plt
-import numpy as np
-import warnings
-
 from Models.model_sources.mtd_source import MTD
 
+from Datasets import Blocksworld_Data
+
+#from Datasets.Markov_Data import HMM_Data
+
+from Datasets.MMC_Data import MMC_data
+from Datasets.Fruit_Data import fruit_domain
+
+import warnings
+
 warnings.filterwarnings("ignore")
+
 
 amount_to_average = 1
 
 training_master = []
 testing_master = []
 
-state_count = 10
+state_count = 7
 order = 3
-sgo_type = "greedy"
-methods = [FMC, MMC, ]  # HMC,] #MTD]  # FMC]
+sgo_type = "hillclimb"
+methods = [HMC, FMC, MMC]
 types = [m.__name__ for m in methods]
-dataset = watch_and_help.watchandhelp()
-
-dataset_size = 2500
-print(f"Dataset: {dataset.__class__.__name__}")
-# upload
-action_prediction = False
-
+dataset = Blocksworld_Data.blocks
+#dataset = MMC_data
+print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:
-        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size, False, True,
-                                                            True)  ## Fitting model
+        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(state_count, order, 50000, True)  ## Fitting model
     else:
-        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, dataset_size)  ## Fitting model
-
-    print(f"Dataset Size: {len(X_train) + len(y_train)}")
-    all_states = set(np.unique(X_train)) | set(y_train) | set(np.unique(X_test)) | set(y_test)
-    state_count = len(all_states)
-    print(f"State Count {state_count}")
-
-    state_count = max(all_states)+1
-    reverse_states = {v: k for k, v in dataset.state_keys.items()}
-    actions = set()
-    action_index = 0
-    for t in reverse_states:
-        actions.add(reverse_states[t][action_index])
-
-    if action_prediction:
-        print(f"Actions: {actions}")
-        print(f"Action Size: {len(actions)}")
-
-
+        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, 30000, True)  ## Fitting model
     args_training = {"X_train": X_train, "y_train": y_train}
     args_testing = {"X_test": X_test, "y_test": y_test}
     results_training = []
@@ -63,39 +41,15 @@ for _ in range(amount_to_average):
 
     for m in methods:
         model = m(state_count, order=order)
-        #print(f"Start training for {model.__class__.__name__}")
-        training = MarkovChain.calculate_time(model.train, args_training)
+        training = MarkovChain.calculate_time(model.train, args_training)[0]
+        testing = MarkovChain.calculate_time(model.test, args_testing)[0]
 
-        # Specifically for blocksworld
-        if action_prediction and dataset == Blocksworld_Data.blocks:
-            state_dict = model.states
-            pred_res = []
-            act_and_index = [(reverse_states[key][0], key) for key, value in enumerate(state_dict)]
-
-            # drop_indexes = [key for key,value in state_dict.items() if "drop" in value]
-            # rise_indexes = [key for key,value in state_dict.items() if "rise" in value]
-
-            for lag, y in zip(X_test, y_test):
-                cpt_row = model.return_probs(lag)
-                action_dict = defaultdict(float)
-                for t in act_and_index:
-                    try:
-                        action_dict[t[0]] += cpt_row[t[1]]
-                    except:
-                        ...
-
-                most_likely_action = max(action_dict, key=action_dict.get)
-                if most_likely_action == reverse_states[y][action_index]:
-                    pred_res.append(1)
-        testing = MarkovChain.calculate_time(model.test, args_testing)
-        print()
         print(model.__class__.__name__)
-        if action_prediction:
-            print(f"Action Prediction: {round(sum(pred_res) / len(y_test)*100)}%")
-        print(f"Training: {round(training[0]*100,2)+'%' if training[0] else 'Na'} {round(training[1],2)}s")
-        print(f"Testing: {round(testing[0]*100,2)}% {round(testing[1],2)}s")
-        print("")
+        print(f"Training: {training}")
+        print(f"Testing: {testing}")
 
+        #print(m.__name__)
+        #print(results_testing[-1],end="\n\n")
     print(results_training)
     print(results_testing)
     training_master.append(results_training)
@@ -104,6 +58,7 @@ for _ in range(amount_to_average):
 
 def find_average(arr):
     return sum(arr) / len(arr)
+
 
 
 # creating the dataset
@@ -120,4 +75,4 @@ def create_bar_graph(data, title):
     plt.title(title)
     plt.show()
 
-# %%
+
