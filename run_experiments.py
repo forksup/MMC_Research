@@ -101,7 +101,7 @@ def plot_data(x, data_results, title, metric: str, ax, colors: str, types, xlabe
                             linewidth=0)
 
             if "Accuracy" in metric:
-                ax.set_ylabel("Prediction Accuracy %", fontsize=ylabel_size)
+                ax.set_ylabel("Prediction Accuracy", fontsize=xlabel_size)
             else:
                 ax.set_ylabel("Time (s)", fontsize=ylabel_size)
         break
