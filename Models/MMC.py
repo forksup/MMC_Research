@@ -370,7 +370,6 @@ class MMC(object):
         res = []
         for i, lag in enumerate(X_test):
             high = self.find_high(lag, self.index_dict)
-            print(high)
             if high < len(self.cpt):
                 if self.argmax((self.cpt[high])) == y_test[i]:
                     res.append(1)
