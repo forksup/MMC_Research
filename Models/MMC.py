@@ -366,14 +366,16 @@ class MMC(object):
             return [1/len(self.cpt) for _ in range(len(self.cpt))]
 
     def test(self, X_test, y_test):
+        high = []
         res = []
         for i, lag in enumerate(X_test):
             high = self.find_high(lag, self.index_dict)
+            print(high)
             if high < len(self.cpt):
                 if self.argmax((self.cpt[high])) == y_test[i]:
                     res.append(1)
 
-        return sum(res) / len(y_test)
+        return [sum(res) / len(y_test), high]
 
     def test_sample(self, x_test, y_test):
         pred = [choice(self.state_size, 1, p=self.cpt[self.find_high(lag, self.index_dict)])[0] for i, lag in
