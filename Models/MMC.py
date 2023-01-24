@@ -376,12 +376,8 @@ class MMC(object):
                 max_arg = self.argmax(self.cpt[high])
                 if max_arg == y_test[i]:
                     res.append(1)
-                else:
-                    utility.append(self.cpt[high][y_test[i]])
 
-        avg_utility = sum(utility) / len(utility)
-
-        return [sum(res) / len(y_test), high_list, avg_utility]
+        return [sum(res) / len(y_test), high_list]
 
     def test_sample(self, x_test, y_test):
         pred = [choice(self.state_size, 1, p=self.cpt[self.find_high(lag, self.index_dict)])[0] for i, lag in
