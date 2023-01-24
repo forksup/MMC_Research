@@ -376,7 +376,7 @@ class MMC(object):
                 max_arg = self.argmax(self.cpt[high])
                 if max_arg == y_test[i]:
                     res.append(1)
-                    utility.append(self.cpt[high][max_arg])
+                utility.append(self.cpt[high][y_test[i]])
 
         avg_utility = sum(utility) / len(utility)
 
