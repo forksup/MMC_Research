@@ -5,7 +5,6 @@ from Models.model_sources.markov_source import MarkovChain
 
 
 class MAX(object):
-
     def __init__(self, state_size, order=3):
         self.state_size = state_size
         self.order = order
@@ -33,9 +32,11 @@ class MAX(object):
             else:
                 results = []
 
-                for key, m in enumerate(self.models[:self.order + 1]):
+                for key, m in enumerate(self.models[: self.order + 1]):
                     # print(episode[i - 1 - key:i - key])
-                    probs = m.transition_matrix[m.possible_states[tuple([x[-(key + 1)]])]]
+                    probs = m.transition_matrix[
+                        m.possible_states[tuple([x[-(key + 1)]])]
+                    ]
                     arg = np.argmax(probs)
 
                     # probability, state,  slice

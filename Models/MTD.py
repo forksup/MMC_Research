@@ -5,11 +5,9 @@ import numpy as np
 
 
 class CAP(MarkovChain):
-
     name = "CAP"
 
     def __init__(self, state_size, order):
-
         self.state_size = state_size
         super().__init__(self.state_size)
         self.order = order
@@ -38,7 +36,9 @@ class CAP(MarkovChain):
                 results = []
 
                 for key in range(self.order):
-                    probs = self.transition_matrix[self.possible_states[tuple([x[-(key + 1)]])]]
+                    probs = self.transition_matrix[
+                        self.possible_states[tuple([x[-(key + 1)]])]
+                    ]
                     arg = np.argmax(probs)
 
                     # probability, state,  slice
@@ -55,4 +55,3 @@ class CAP(MarkovChain):
                 acc.append(0)
 
         return sum(acc) / len(acc)
-

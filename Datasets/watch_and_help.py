@@ -6,16 +6,19 @@ import pandas as pd
 import random
 import numpy as np
 from sklearn.model_selection import train_test_split
+
 # import necessary libraries
 import pandas as pd
 import os
 import glob
 
+
 class watchandhelp(object):
     state_keys = {}
 
-    def gen_data(self, states, order, size, verbose=False, four_blocks=False, drop_arms=False):
-
+    def gen_data(
+        self, states, order, size, verbose=False, four_blocks=False, drop_arms=False
+    ):
         # use glob to get all the csv files
         # in the folder
         path = "Datasets/data_files/new_watch_and_help_.8/"
@@ -25,13 +28,16 @@ class watchandhelp(object):
         # loop over the list of csv files
         for f in txt_files:
             # read the csv file
-            df = pd.read_csv(f,skipinitialspace=True)
+            df = pd.read_csv(f, skipinitialspace=True)
             rows_to_drop = []
-            for key,row in df.iterrows():
-                if key != len(df)-1 and row['Act_A'] == df.iloc[key+1]['Act_A'] \
-                        and row['Act_B'] == df.iloc[key+1]['Act_B']:
+            for key, row in df.iterrows():
+                if (
+                    key != len(df) - 1
+                    and row["Act_A"] == df.iloc[key + 1]["Act_A"]
+                    and row["Act_B"] == df.iloc[key + 1]["Act_B"]
+                ):
                     rows_to_drop.append(key)
-            df = df.drop(labels=rows_to_drop, axis =0)
+            df = df.drop(labels=rows_to_drop, axis=0)
             df = df.reset_index(drop=True)
             dataframes.append(df)
         import random
@@ -54,7 +60,7 @@ class watchandhelp(object):
         y = []
 
         for e in episodes:
-            x.extend([e[i:i + order] for i in range(len(e) - order)])
+            x.extend([e[i : i + order] for i in range(len(e) - order)])
             y.extend([e[i] for i in range(order, len(e))])
 
         noise = 0

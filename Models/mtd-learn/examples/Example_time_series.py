@@ -22,16 +22,16 @@ from mtdlearn.mtd import MTD, RandomWalk
 from mtdlearn.preprocessing import PathEncoder, SequenceCutter
 
 # +
-df = pd.read_csv('euro_usd.csv')
+df = pd.read_csv("euro_usd.csv")
 
-df['Change'] = df.Closing_rate.diff()
+df["Change"] = df.Closing_rate.diff()
 
-df['Change_enc'] = np.nan
+df["Change_enc"] = np.nan
 
-df.loc[df.Change < 0.0, 'Change_enc'] = '1_DROP'
-df.loc[df.Change < -0.005, 'Change_enc'] = '0_BIG_DROP'
-df.loc[df.Change >= 0, 'Change_enc'] = '2_RISE'
-df.loc[df.Change >= 0.005, 'Change_enc'] = '3_BIG_RISE'
+df.loc[df.Change < 0.0, "Change_enc"] = "1_DROP"
+df.loc[df.Change < -0.005, "Change_enc"] = "0_BIG_DROP"
+df.loc[df.Change >= 0, "Change_enc"] = "2_RISE"
+df.loc[df.Change >= 0.005, "Change_enc"] = "3_BIG_RISE"
 
 df.dropna(inplace=True)
 # -
@@ -133,4 +133,4 @@ print(model.aic.round(1), model.bic.round(1))
 xs = [0, 1, 2, 3, 4]
 
 sns.lineplot(x=xs, y=aics)
-sns.lineplot(x=xs, y=bics);
+sns.lineplot(x=xs, y=bics)

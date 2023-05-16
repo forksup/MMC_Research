@@ -53,14 +53,14 @@ class MarkovChain(object):
         # (necessary to recover state label in High Order MC)
 
         self.possible_states = {
-            self.convert_state(j): i for i, j in
-            enumerate(itertools.product(range(n_states), repeat=order))
+            self.convert_state(j): i
+            for i, j in enumerate(itertools.product(range(n_states), repeat=order))
         }
 
         # allocate transition matrix
-        self.transition_matrix = sparse.dok_matrix((
-            (len(self.possible_states), self.number_of_states)
-        ), dtype=np.float64)
+        self.transition_matrix = sparse.dok_matrix(
+            ((len(self.possible_states), self.number_of_states)), dtype=np.float64
+        )
 
     @staticmethod
     def calculate_time(function, args):
@@ -79,8 +79,7 @@ class MarkovChain(object):
 
     @staticmethod
     def convert_state(s):
-        return '.'.join(str(x) for x in s)
-
+        return ".".join(str(x) for x in s)
 
     def _update_transition_matrix(self, states_sequence, normalize=True):
         """
@@ -98,15 +97,11 @@ class MarkovChain(object):
 
         funct = self.convert_state
 
-
-        #if isinstance(states_sequence[0][0], int) or isinstance(states_sequence[0][0], np.int64):
-            #funct = lambda t: self.convert_state([t])
+        # if isinstance(states_sequence[0][0], int) or isinstance(states_sequence[0][0], np.int64):
+        # funct = lambda t: self.convert_state([t])
 
         for x, y in zip(states_sequence[0], states_sequence[1]):
-            self.transition_matrix[
-                self.possible_states[funct(x)],
-                y
-            ] += 1
+            self.transition_matrix[self.possible_states[funct(x)], y] += 1
         if normalize:
             self.normalize_transitions()
 
@@ -203,7 +198,7 @@ class MarkovChain(object):
                             "weight": initial_state[i],
                             "prev_state": None,
                             "state_repr": state_repr,
-                            "actual": initial_state[i]
+                            "actual": initial_state[i],
                         }
                     ]
                 continue
@@ -221,9 +216,10 @@ class MarkovChain(object):
                     state_repr = np.zeros(self.transition_matrix.shape[0])
                     state_repr[predicted_state] = 1
 
-                    if prediction[
-                        0, predicted_state
-                    ] * _state.get("actual") > threshold:
+                    if (
+                        prediction[0, predicted_state] * _state.get("actual")
+                        > threshold
+                    ):
                         state_vector[step] += [
                             {
                                 "state_id": state_id,
@@ -231,9 +227,8 @@ class MarkovChain(object):
                                 "weight": prediction[0, predicted_state],
                                 "prev_state": _state.get("state_id"),
                                 "state_repr": state_repr,
-                                "actual": prediction[
-                                              0, predicted_state
-                                          ] * _state.get("actual")
+                                "actual": prediction[0, predicted_state]
+                                * _state.get("actual"),
                             }
                         ]
 
@@ -251,5 +246,6 @@ class MarkovChain(object):
             for n, _state in enumerate(state):
                 pos[_state["state_id"]] = (key, -n)
         return pos
+
 
 # %%

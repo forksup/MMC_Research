@@ -5,7 +5,6 @@ from datetime import datetime
 
 
 class HMC(MarkovChain):
-
     def __init__(self, state_size, order=3, verbose=True):
         self.state_count = state_size
         self.order = order
@@ -14,12 +13,32 @@ class HMC(MarkovChain):
         super().__init__(self.state_count, order=order, verbose=verbose)
 
     def train(self, X_train, y_train):
-        super().fit([X_train[:, -self.order:], y_train])
+        super().fit([X_train[:, -self.order :], y_train])
         return None
 
     def test(self, X_test, y_test):
-        results = [1 for i in range(len(X_test)) if np.argmax(self.transition_matrix[self.possible_states[MarkovChain.convert_state(X_test[i][-self.order:])]]) == y_test[i]]
+        results = [
+            1
+            for i in range(len(X_test))
+            if np.argmax(
+                self.transition_matrix[
+                    self.possible_states[
+                        MarkovChain.convert_state(X_test[i][-self.order :])
+                    ]
+                ]
+            )
+            == y_test[i]
+        ]
         return sum(results) / len(X_test)
 
     def predict(self, X_test):
-        return [np.argmax(self.transition_matrix[self.possible_states[MarkovChain.convert_state(X_test[i][-self.order:])]]) for i in range(len(X_test))]
+        return [
+            np.argmax(
+                self.transition_matrix[
+                    self.possible_states[
+                        MarkovChain.convert_state(X_test[i][-self.order :])
+                    ]
+                ]
+            )
+            for i in range(len(X_test))
+        ]

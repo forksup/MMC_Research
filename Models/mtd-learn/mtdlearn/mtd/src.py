@@ -5,7 +5,7 @@ from sklearn.base import BaseEstimator
 from datetime import datetime
 from typing import List, Tuple, Optional
 
-np.seterr(divide='ignore', invalid='ignore')
+np.seterr(divide="ignore", invalid="ignore")
 
 
 class _ChainBase(BaseEstimator):
@@ -52,21 +52,22 @@ class _ChainBase(BaseEstimator):
         min_value = array.min()
         n_dim = np.unique(array).shape[0]
         if min_value != 0:
-            raise ValueError('Lowest label should be equal to zero')
+            raise ValueError("Lowest label should be equal to zero")
         if max_value + 1 != n_dim:
-            raise ValueError('Highest label should be equal to number of unique labels minus one')
+            raise ValueError(
+                "Highest label should be equal to number of unique labels minus one"
+            )
         self._n_dimensions = n_dim
 
-    def _aggregate_chain(self,
-                         x: np.ndarray,
-                         sample_weight: Optional[np.ndarray] = None) -> np.ndarray:
-
+    def _aggregate_chain(
+        self, x: np.ndarray, sample_weight: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         if sample_weight is None:
             sample_weight = np.ones(x.shape[0], dtype=np.int)
 
         n_columns = x.shape[1]
         values_dict = {i: 0 for i in range(self._n_dimensions ** (x.shape[1]))}
-        idx = [self._n_dimensions ** i for i in range(n_columns)]
+        idx = [self._n_dimensions**i for i in range(n_columns)]
 
         idx = np.array(idx[::-1])
         data_indexes = np.dot(x, idx)
@@ -77,11 +78,9 @@ class _ChainBase(BaseEstimator):
         return np.array(list(values_dict.values()))
 
     def _calculate_aic(self) -> None:
-
         self.aic = -2 * self.log_likelihood + 2 * self._n_parameters
 
     def _calculate_bic(self) -> None:
-
         self.bic = -2 * self.log_likelihood + np.log(self.samples) * self._n_parameters
 
     def predict_proba(self, x: np.ndarray) -> np.ndarray:
@@ -97,7 +96,7 @@ class _ChainBase(BaseEstimator):
         if self.order == 0:
             x = np.zeros((x.shape[0], 1), dtype=int)
 
-        idx = [self._n_dimensions ** i for i in range(x.shape[1])]
+        idx = [self._n_dimensions**i for i in range(x.shape[1])]
 
         idx = np.array(idx[::-1])
         indexes = np.dot(x, idx)
@@ -120,36 +119,41 @@ class _ChainBase(BaseEstimator):
         logs = np.nan_to_num(np.log(self.transition_matrix), nan=0.0)
         self.log_likelihood = (transition_matrix_num * logs).sum()
 
-    def _create_transition_matrix(self,
-                                  x: np.ndarray,
-                                  y: np.ndarray,
-                                  sample_weight: np.ndarray) -> np.ndarray:
+    def _create_transition_matrix(
+        self, x: np.ndarray, y: np.ndarray, sample_weight: np.ndarray
+    ) -> np.ndarray:
         x = np.hstack([x, y.reshape(-1, 1)])
         self._calculate_dimensions(x)
         transition_matrix = self._aggregate_chain(x, sample_weight)
         transition_matrix_num = transition_matrix.reshape(-1, self._n_dimensions)
-        self.transition_matrix = transition_matrix_num / transition_matrix_num.sum(1).reshape(-1, 1)
+        self.transition_matrix = transition_matrix_num / transition_matrix_num.sum(
+            1
+        ).reshape(-1, 1)
         return transition_matrix_num
 
     def _check_and_reshape_input(self, x: np.ndarray) -> np.ndarray:
         if x.shape[1] > self.order:
-            print(f'WARNING: The input has too many columns. Expected: {self.order}, got: {x.shape[1]}. '
-                  f'The columns were trimmed.')
-            x = x[:, -self.order:]
+            print(
+                f"WARNING: The input has too many columns. Expected: {self.order}, got: {x.shape[1]}. "
+                f"The columns were trimmed."
+            )
+            x = x[:, -self.order :]
         if x.shape[1] < self.order:
-            raise ValueError(f'WARNING: The input has less columns than order. Expected: {self.order}, '
-                             f'got: {x.shape[1]}.')
+            raise ValueError(
+                f"WARNING: The input has less columns than order. Expected: {self.order}, "
+                f"got: {x.shape[1]}."
+            )
         return x
 
     def _create_markov(self) -> None:
-
         array_coords = product(range(self._n_dimensions), repeat=self.order)
 
         transition_matrix_list = []
         for idx in array_coords:
-            t_matrix_part = np.array([self.transition_matrices[i, idx[i], :] for i in range(self.order)]).T
-            transition_matrix_list.append(np.dot(t_matrix_part,
-                                                 self.lambdas))
+            t_matrix_part = np.array(
+                [self.transition_matrices[i, idx[i], :] for i in range(self.order)]
+            ).T
+            transition_matrix_list.append(np.dot(t_matrix_part, self.lambdas))
         self.transition_matrix = np.array(transition_matrix_list)
 
     def predict_random(self, x: np.ndarray) -> List:
@@ -178,8 +182,10 @@ class _ChainBase(BaseEstimator):
             self.expanded_matrix = np.zeros((len(idx), len(idx)))
             for i, row in enumerate(idx):
                 for j, col in enumerate(idx):
-                    if row[-(self.order - 1):] == col[:(self.order - 1)]:
-                        self.expanded_matrix[i, j] = self.transition_matrix[i, j % self._n_dimensions]
+                    if row[-(self.order - 1) :] == col[: (self.order - 1)]:
+                        self.expanded_matrix[i, j] = self.transition_matrix[
+                            i, j % self._n_dimensions
+                        ]
 
         else:
             self.expanded_matrix = self.transition_matrix.copy()
@@ -285,16 +291,17 @@ class MTD(_ChainBase):
 
     """
 
-    def __init__(self,
-                 order: int,
-                 number_of_initiations: int = 10,
-                 max_iter: int = 100,
-                 min_gain: float = 0.1,
-                 lambdas_init: Optional[np.ndarray] = None,
-                 transition_matrices_init: Optional[np.ndarray] = None,
-                 verbose: np.int = 1,
-                 n_jobs: int = -1) -> None:
-
+    def __init__(
+        self,
+        order: int,
+        number_of_initiations: int = 10,
+        max_iter: int = 100,
+        min_gain: float = 0.1,
+        lambdas_init: Optional[np.ndarray] = None,
+        transition_matrices_init: Optional[np.ndarray] = None,
+        verbose: np.int = 1,
+        n_jobs: int = -1,
+    ) -> None:
         super().__init__(order)
         self.number_of_initiations = number_of_initiations
         self.lambdas_init = lambdas_init
@@ -304,10 +311,9 @@ class MTD(_ChainBase):
         self.verbose = verbose
         self.n_jobs = n_jobs
 
-    def fit(self,
-            x: np.ndarray,
-            y: np.ndarray,
-            sample_weight: Optional[np.ndarray] = None) -> None:
+    def fit(
+        self, x: np.ndarray, y: np.ndarray, sample_weight: Optional[np.ndarray] = None
+    ) -> None:
         """
         Fit MTD model.
 
@@ -334,86 +340,103 @@ class MTD(_ChainBase):
 
         self._create_indexes()
 
-        n_direct = [x.reshape(-1,
-                              self._n_dimensions,
-                              self._n_dimensions ** (self.order - i - 1),
-                              self._n_dimensions).sum(0).sum(1) for i in range(self.order)]
+        n_direct = [
+            x.reshape(
+                -1,
+                self._n_dimensions,
+                self._n_dimensions ** (self.order - i - 1),
+                self._n_dimensions,
+            )
+            .sum(0)
+            .sum(1)
+            for i in range(self.order)
+        ]
         n_direct = np.array(n_direct)
 
-        candidates = Parallel(n_jobs=self.n_jobs)(delayed(MTD._fit_one)(x,
-                                                                        self._indexes,
-                                                                        self.order,
-                                                                        self._n_dimensions,
-                                                                        self.min_gain,
-                                                                        self.max_iter,
-                                                                        self.verbose,
-                                                                        n_direct,
-                                                                        self.lambdas_init,
-                                                                        self.transition_matrices_init)
-                                                  for _ in range(self.number_of_initiations))
+        candidates = Parallel(n_jobs=self.n_jobs)(
+            delayed(MTD._fit_one)(
+                x,
+                self._indexes,
+                self.order,
+                self._n_dimensions,
+                self.min_gain,
+                self.max_iter,
+                self.verbose,
+                n_direct,
+                self.lambdas_init,
+                self.transition_matrices_init,
+            )
+            for _ in range(self.number_of_initiations)
+        )
 
-        self.log_likelihood, self.lambdas, self.transition_matrices = self._select_the_best_candidate(candidates)
+        (
+            self.log_likelihood,
+            self.lambdas,
+            self.transition_matrices,
+        ) = self._select_the_best_candidate(candidates)
 
         if self.verbose > 0:
-            print(f'log-likelihood value: {self.log_likelihood}')
+            print(f"log-likelihood value: {self.log_likelihood}")
 
         self._create_markov()
-        self._n_parameters = (1 + self.order * (self._n_dimensions - 1)) * (self._n_dimensions - 1)
+        self._n_parameters = (1 + self.order * (self._n_dimensions - 1)) * (
+            self._n_dimensions - 1
+        )
         self._calculate_aic()
         self._calculate_bic()
 
     @staticmethod
-    def _fit_one(x: np.ndarray,
-                 indexes: List[Tuple[int]],
-                 order: int,
-                 n_dimensions: int,
-                 min_gain: float,
-                 max_iter: int,
-                 verbose: int,
-                 n_direct: np.ndarray,
-                 lambdas: Optional[np.ndarray] = None,
-                 transition_matrices: Optional[np.ndarray] = None) -> Tuple[float, np.ndarray, np.ndarray]:
-
+    def _fit_one(
+        x: np.ndarray,
+        indexes: List[Tuple[int]],
+        order: int,
+        n_dimensions: int,
+        min_gain: float,
+        max_iter: int,
+        verbose: int,
+        n_direct: np.ndarray,
+        lambdas: Optional[np.ndarray] = None,
+        transition_matrices: Optional[np.ndarray] = None,
+    ) -> Tuple[float, np.ndarray, np.ndarray]:
         if lambdas is None:
             lambdas = np.random.rand(order)
             lambdas = lambdas / lambdas.sum()
         if transition_matrices is None:
             transition_matrices = np.random.rand(order, n_dimensions, n_dimensions)
-            transition_matrices = transition_matrices / transition_matrices.sum(2).reshape(order, n_dimensions, 1)
+            transition_matrices = transition_matrices / transition_matrices.sum(
+                2
+            ).reshape(order, n_dimensions, 1)
 
         iteration = 0
         gain = min_gain * 2
-        log_likelihood = MTD._calculate_log_likelihood_mtd(indexes,
-                                                           x,
-                                                           transition_matrices,
-                                                           lambdas)
+        log_likelihood = MTD._calculate_log_likelihood_mtd(
+            indexes, x, transition_matrices, lambdas
+        )
         while iteration < max_iter and gain > min_gain:
             old_ll = log_likelihood
-            p_expectation, p_expectation_direct = MTD._expectation_step(n_dimensions,
-                                                                        order,
-                                                                        indexes,
-                                                                        transition_matrices,
-                                                                        lambdas)
-            lambdas, transition_matrices = MTD._maximization_step(n_dimensions,
-                                                                  order,
-                                                                  x,
-                                                                  n_direct,
-                                                                  p_expectation,
-                                                                  p_expectation_direct)
-            log_likelihood = MTD._calculate_log_likelihood_mtd(indexes,
-                                                               x,
-                                                               transition_matrices,
-                                                               lambdas)
+            p_expectation, p_expectation_direct = MTD._expectation_step(
+                n_dimensions, order, indexes, transition_matrices, lambdas
+            )
+            lambdas, transition_matrices = MTD._maximization_step(
+                n_dimensions, order, x, n_direct, p_expectation, p_expectation_direct
+            )
+            log_likelihood = MTD._calculate_log_likelihood_mtd(
+                indexes, x, transition_matrices, lambdas
+            )
             gain = log_likelihood - old_ll
             iteration += 1
 
             if verbose > 1:
                 current_time = datetime.now()
-                print(f'{current_time.time()} iteration: {iteration}  '
-                      f'gain: {round(gain, 5)} ll_value: {round(log_likelihood, 5)}')
+                print(
+                    f"{current_time.time()} iteration: {iteration}  "
+                    f"gain: {round(gain, 5)} ll_value: {round(log_likelihood, 5)}"
+                )
 
         if iteration == max_iter:
-            print('WARNING: The model has not converged. Consider increasing the max_iter parameter.')
+            print(
+                "WARNING: The model has not converged. Consider increasing the max_iter parameter."
+            )
 
         if verbose > 0:
             print(f"log-likelihood value: {log_likelihood}")
@@ -421,27 +444,34 @@ class MTD(_ChainBase):
         return log_likelihood, lambdas, transition_matrices
 
     @staticmethod
-    def _calculate_log_likelihood_mtd(indexes: List[Tuple[int]],
-                                      n_occurrence: np.ndarray,
-                                      transition_matrices: np.ndarray,
-                                      lambdas: np.ndarray) -> float:
-
+    def _calculate_log_likelihood_mtd(
+        indexes: List[Tuple[int]],
+        n_occurrence: np.ndarray,
+        transition_matrices: np.ndarray,
+        lambdas: np.ndarray,
+    ) -> float:
         log_likelihood = 0
 
         for i, idx in enumerate(indexes):
             if n_occurrence[i] > 0:
-                mtd_value = sum([lam * transition_matrices[i, idx[i], idx[-1]] for i, lam in enumerate(lambdas)])
+                mtd_value = sum(
+                    [
+                        lam * transition_matrices[i, idx[i], idx[-1]]
+                        for i, lam in enumerate(lambdas)
+                    ]
+                )
                 log_likelihood += n_occurrence[i] * np.log(mtd_value)
 
         return log_likelihood
 
     @staticmethod
-    def _expectation_step(n_dimensions: int,
-                          order: int,
-                          indexes: List[Tuple[int]],
-                          transition_matrices: np.ndarray,
-                          lambdas: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-
+    def _expectation_step(
+        n_dimensions: int,
+        order: int,
+        indexes: List[Tuple[int]],
+        transition_matrices: np.ndarray,
+        lambdas: np.ndarray,
+    ) -> Tuple[np.ndarray, np.ndarray]:
         p_expectation = []
         for i in range(n_dimensions):
             parts = product(*transition_matrices[:, :, i].tolist())
@@ -450,12 +480,15 @@ class MTD(_ChainBase):
         p_expectation = np.hstack(p_expectation).reshape(-1, order) * lambdas
 
         p_expectation = p_expectation / p_expectation.sum(axis=1).reshape(-1, 1)
-        p_expectation = np.nan_to_num(p_expectation, nan=1. / order)
+        p_expectation = np.nan_to_num(p_expectation, nan=1.0 / order)
 
-        p_expectation_direct = [p_expectation[:, i].reshape(-1,
-                                                            n_dimensions,
-                                                            n_dimensions ** (order - i - 1),
-                                                            n_dimensions).sum(0).sum(1) for i in range(order)]
+        p_expectation_direct = [
+            p_expectation[:, i]
+            .reshape(-1, n_dimensions, n_dimensions ** (order - i - 1), n_dimensions)
+            .sum(0)
+            .sum(1)
+            for i in range(order)
+        ]
 
         p_expectation_direct = np.array(p_expectation_direct)
         p_expectation_direct = p_expectation_direct / p_expectation_direct.sum(axis=0)
@@ -463,25 +496,29 @@ class MTD(_ChainBase):
         return p_expectation, p_expectation_direct
 
     @staticmethod
-    def _maximization_step(n_dimensions: int,
-                           order: int,
-                           n_occurrence: np.ndarray,
-                           n_direct: np.ndarray,
-                           p_expectation: np.ndarray,
-                           p_expectation_direct: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-
+    def _maximization_step(
+        n_dimensions: int,
+        order: int,
+        n_occurrence: np.ndarray,
+        n_direct: np.ndarray,
+        p_expectation: np.ndarray,
+        p_expectation_direct: np.ndarray,
+    ) -> Tuple[np.ndarray, np.ndarray]:
         denominator = 1 / sum(n_occurrence)
         sum_part = (p_expectation * n_occurrence.reshape(-1, 1)).sum(0)
         lambdas = denominator * sum_part
 
         transition_matrices = n_direct * p_expectation_direct
-        transition_matrices = transition_matrices / transition_matrices.sum(2).reshape(order, n_dimensions, 1)
+        transition_matrices = transition_matrices / transition_matrices.sum(2).reshape(
+            order, n_dimensions, 1
+        )
 
         return lambdas, transition_matrices
 
     @staticmethod
-    def _select_the_best_candidate(candidates: List) -> Tuple[float, np.ndarray, np.ndarray]:
-
+    def _select_the_best_candidate(
+        candidates: List,
+    ) -> Tuple[float, np.ndarray, np.ndarray]:
         log_likelihood = candidates[0][0]
         lambdas = candidates[0][1]
         transition_matrices = candidates[0][2]
@@ -533,14 +570,12 @@ class MarkovChain(_ChainBase):
     """
 
     def __init__(self, order: int, verbose: int = 1) -> None:
-
         super().__init__(order)
         self.verbose = verbose
 
-    def fit(self,
-            x: np.ndarray,
-            y: np.ndarray,
-            sample_weight: Optional[np.ndarray] = None) -> None:
+    def fit(
+        self, x: np.ndarray, y: np.ndarray, sample_weight: Optional[np.ndarray] = None
+    ) -> None:
         """
         Fit Markov Chain model.
 
@@ -560,7 +595,9 @@ class MarkovChain(_ChainBase):
 
         x = self._check_and_reshape_input(x)
         self._n_dimensions = np.unique(np.hstack([x, y.reshape(-1, 1)])).shape[0]
-        self._n_parameters = (self._n_dimensions ** self.order) * (self._n_dimensions - 1)
+        self._n_parameters = (self._n_dimensions**self.order) * (
+            self._n_dimensions - 1
+        )
         self._create_indexes()
 
         transition_matrix_num = self._create_transition_matrix(x, y, sample_weight)
@@ -570,7 +607,7 @@ class MarkovChain(_ChainBase):
         self._calculate_bic()
 
         if self.verbose > 0:
-            print(f'log-likelihood value: {self.log_likelihood}')
+            print(f"log-likelihood value: {self.log_likelihood}")
 
 
 class RandomWalk(_ChainBase):
@@ -607,15 +644,11 @@ class RandomWalk(_ChainBase):
         Value of the Bayesian Information Criterion (BIC)
     """
 
-    def __init__(self,
-                 verbose: int = 1) -> None:
-
+    def __init__(self, verbose: int = 1) -> None:
         super().__init__(0)
         self.verbose = verbose
 
-    def fit(self,
-            y: np.ndarray,
-            sample_weight: Optional[np.ndarray] = None) -> None:
+    def fit(self, y: np.ndarray, sample_weight: Optional[np.ndarray] = None) -> None:
         """
         Fit Random Walk model.
 
@@ -643,4 +676,4 @@ class RandomWalk(_ChainBase):
         self._calculate_bic()
 
         if self.verbose > 0:
-            print(f'log-likelihood value: {self.log_likelihood}')
+            print(f"log-likelihood value: {self.log_likelihood}")

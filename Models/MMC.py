@@ -17,8 +17,14 @@ class sgo_types(Enum):
 
 
 class MMC(object):
-
-    def __init__(self, state_size, order, sgo_method: sgo_types = sgo_types.greedy, verbose=False):
+    def __init__(
+        self,
+        state_size,
+        order,
+        sgo_method: sgo_types = sgo_types.greedy,
+        misalignment=True,
+        verbose=False,
+    ):
         self.sgom = sgo_method
         self.state_size = state_size
         self.states = [i for i in range(state_size)]
@@ -27,7 +33,7 @@ class MMC(object):
         self.name = "MMC"
         self.verbose = verbose
         self.index_dict = {}
-        self.misalignment = True
+        self.misalignment = misalignment
 
     @staticmethod
     def find_high(lag, index_dict):
@@ -43,12 +49,14 @@ class MMC(object):
         while len(states_left_to_check) > 1:
             states = []
             for s in states_left_to_check:
-                self.index_dict = defaultdict(lambda: float('inf'))
+                self.index_dict = defaultdict(lambda: float("inf"))
                 self.index_dict[s] = 0
                 prob_res = list(self.calculate_probabilities([s])[0][s].values())
                 c = sum(prob_res)
                 p_values = {i: prob_res[i] / c for i in range(len(prob_res))}
-                divident = np.sum([(math.log(p_values[i]) * n) for i, n in enumerate(prob_res)])
+                divident = np.sum(
+                    [(math.log(p_values[i]) * n) for i, n in enumerate(prob_res)]
+                )
                 calc = (divident * -1) ** (1 / c)
                 states.append((calc, s))
             states.sort(reverse=True)
@@ -72,7 +80,7 @@ class MMC(object):
             for val in n.values():
                 x *= val
             x^
-            """
+        """
         SGO = self.geometric_mean()
         n, normalized = self.calculate_probabilities(SGO)
 
@@ -101,7 +109,7 @@ class MMC(object):
 
         for i, lag in enumerate(self.X_train):
             s = self.find_high(lag, self.index_dict)
-            if s is not float('-inf'):
+            if s is not float("-inf"):
                 n[s][self.y_train[i]] += 1
             else:
                 pass
@@ -140,12 +148,12 @@ class MMC(object):
 
         for kn, d in n.items():
             for key, value in d.items():
-                result[kn][key] = n[kn][key] * math.log(1+probs[kn][key])
+                result[kn][key] = n[kn][key] * math.log(1 + probs[kn][key])
         return result
 
     @staticmethod
     def create_index_dict(sgo):
-        index = defaultdict(lambda: float('inf'))
+        index = defaultdict(lambda: float("inf"))
         for i, s in enumerate(sgo):
             index[s] = i
         return index
@@ -162,10 +170,9 @@ class MMC(object):
             else:
                 return 0
 
-        index_dict = defaultdict(lambda: float('inf'))
+        index_dict = defaultdict(lambda: float("inf"))
 
         while len(states_to_check) > 1:
-
             n = defaultdict(lambda: defaultdict(float))
 
             for i, lag in enumerate(self.X_train):
@@ -184,13 +191,13 @@ class MMC(object):
             SGO.append(s)
             if s not in states_to_check:
                 raise Exception(
-                    "State does not exist in states to check. Potentially incorrect amount of states provided")
+                    "State does not exist in states to check. Potentially incorrect amount of states provided"
+                )
             states_to_check.remove(s)
         SGO.append(states_to_check.pop())
         return SGO
 
     def train(self, X_train, y_train):
-
         self.states = set().union(*[np.unique(X_train), np.unique(y_train)])
         self.X_train = X_train
         self.y_train = y_train
@@ -200,7 +207,9 @@ class MMC(object):
         elif self.sgom == sgo_types.hillclimb:
             SGOs = [self.find_SGO_hill_climb()]
         elif self.sgom == sgo_types.full:
-            SGOs = list(itertools.permutations([s for s in range(self.state_size) if s != -1]))
+            SGOs = list(
+                itertools.permutations([s for s in range(self.state_size) if s != -1])
+            )
             random.shuffle(SGOs)
         elif self.sgom == sgo_types.geometric_mean:
             SGOs = [self.geometric_mean()]
@@ -224,7 +233,7 @@ class MMC(object):
 
             mis_alignment = []
             # change this so we grab sgo from new data generation problem
-            # uncomment out this section 
+            # uncomment out this section
             # Retrieve all combinations of any two states to check for misalignments
             # misalignment in java code
             # the remaining items
@@ -233,8 +242,7 @@ class MMC(object):
             i_fromdata = {s: sgo_from_data.index(s) for s in self.states}
             i_fromsgo = {s: SGO.index(s) for s in self.states}
 
-            state_index = {s:i for s,i in enumerate(self.states)}
-
+            state_index = {s: i for s, i in enumerate(self.states)}
 
             set1 = set(sgo_from_data)
             mis_alignment1 = []
@@ -245,7 +253,9 @@ class MMC(object):
                 for i in range(len(i_fromdata) - 1):
                     if SGO[i] != sgo_from_data[i]:
                         if i_fromsgo[SGO[i]] < i_fromdata[SGO[i]]:
-                            self.combine_misalignments(set(SGO[i:i_fromdata[SGO[i]]+1]), mis_alignment1)
+                            self.combine_misalignments(
+                                set(SGO[i : i_fromdata[SGO[i]] + 1]), mis_alignment1
+                            )
 
                         """
                         set_diff = set1 - set(SGO[i_fromsgo[sgo_from_data[i]] :])
@@ -256,10 +266,8 @@ class MMC(object):
 
             # all of the states inbetween where its suppoed to be are misaligned
             if self.verbose:
-
                 print(f"SGO: {SGO}")
                 print(f"{mis_alignment}")
-
 
             for m in mis_alignment1:
                 # combine the count of the maximum key for each probability value then divide that by the
@@ -271,15 +279,15 @@ class MMC(object):
                 input_table = {s: count_dict[s] for s in m}
                 new_table = {}
 
-
                 # Combine all the cpt's
-                res = dict(sum((Counter(dict(x)) for x in input_table.values()), Counter()))
+                res = dict(
+                    sum((Counter(dict(x)) for x in input_table.values()), Counter())
+                )
                 max_values = [max(input_table[key].values()) for key in input_table]
 
                 max_prob = sum(max_values) / sum(res.values())
 
                 for key in new_table:
-
                     # find the key of the max value
                     max_key = max(input_table[key], key=input_table[key].get)
 
@@ -292,8 +300,13 @@ class MMC(object):
                         new_table[key][i] = input_table[key][i]
 
                     # loop through all the rest of the items in descending order of probability
-                    for k2 in dict(sorted(new_table[key].items(), key=lambda item: item[1], reverse=True)):
-
+                    for k2 in dict(
+                        sorted(
+                            new_table[key].items(),
+                            key=lambda item: item[1],
+                            reverse=True,
+                        )
+                    ):
                         if k2 == max_key:
                             continue
 
@@ -322,7 +335,7 @@ class MMC(object):
                     if len(new_table) != self.state_size:
                         print("length mismatch")
                     if self.verbose:
-                            print(sum(new_table[key].values()))
+                        print(sum(new_table[key].values()))
                 for key in new_table:
                     n[key] = new_table
 
@@ -356,14 +369,17 @@ class MMC(object):
         return np.random.choice(np.argwhere(arr == np.amax(arr)).flatten(), size=1)[0]
 
     def predict(self, X_test):
-        return [self.argmax((self.cpt[self.find_high(lag, self.index_dict)])) for i, lag in enumerate(X_test)]
+        return [
+            self.argmax((self.cpt[self.find_high(lag, self.index_dict)]))
+            for i, lag in enumerate(X_test)
+        ]
 
     def return_probs(self, lag):
         state = self.find_high(lag, self.index_dict)
         if state < len(self.cpt):
             return self.cpt[self.find_high(lag, self.index_dict)]
         else:
-            return [1/len(self.cpt) for _ in range(len(self.cpt))]
+            return [1 / len(self.cpt) for _ in range(len(self.cpt))]
 
     def test(self, X_test, y_test):
         high_list = []
@@ -380,7 +396,15 @@ class MMC(object):
         return [sum(res) / len(y_test), high_list]
 
     def test_sample(self, x_test, y_test):
-        pred = [choice(self.state_size, 1, p=self.cpt[self.find_high(lag, self.index_dict)])[0] for i, lag in
-                enumerate(x_test)]
-        return sum([1 for i in range(len(y_test)) if pred[i] == y_test[i]]) / len(y_test)
+        pred = [
+            choice(
+                self.state_size, 1, p=self.cpt[self.find_high(lag, self.index_dict)]
+            )[0]
+            for i, lag in enumerate(x_test)
+        ]
+        return sum([1 for i in range(len(y_test)) if pred[i] == y_test[i]]) / len(
+            y_test
+        )
+
+
 # %%

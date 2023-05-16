@@ -9,14 +9,15 @@ from datetime import datetime
 
 
 class HMM_Decisive(object):
-
     @staticmethod
     def gen_data(state_size, order, size, verbose=False):
-        cg = ChainGenerator(tuple(ascii_letters[:state_size]), order=order, min_len=order, max_len=order)
+        cg = ChainGenerator(
+            tuple(ascii_letters[:state_size]), order=order, min_len=order, max_len=order
+        )
         for s, v in cg._label_dict.items():
             state_to_change = randint(0, state_size - 1)
-            min_rand = 1 / state_size + .1
-            new_prob = uniform(min_rand, .9)
+            min_rand = 1 / state_size + 0.1
+            new_prob = uniform(min_rand, 0.9)
             cg.transition_matrix[s][state_to_change] = new_prob
             rem = 1 - new_prob
             for st in range(state_size):

@@ -6,7 +6,7 @@ from Models.model_sources.mtd_source import MTD
 
 from Datasets import Blocksworld_Data
 
-#from Datasets.Markov_Data import HMM_Data
+# from Datasets.Markov_Data import HMM_Data
 
 from Datasets.MMC_Data import MMC_data
 from Datasets.Fruit_Data import fruit_domain
@@ -27,13 +27,17 @@ sgo_type = "hillclimb"
 methods = [HMC, FMC, MMC]
 types = [m.__name__ for m in methods]
 dataset = Blocksworld_Data.blocks
-#dataset = MMC_data
+# dataset = MMC_data
 print(f"Dataset: {dataset.__name__}")
 for _ in range(amount_to_average):
     if dataset == Blocksworld_Data.blocks:
-        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(state_count, order, 50000, True)  ## Fitting model
+        (X_train, X_test, y_train, y_test), state_count = dataset.gen_data(
+            state_count, order, 50000, True
+        )  ## Fitting model
     else:
-        X_train, X_test, y_train, y_test = dataset.gen_data(state_count, order, 30000, True)  ## Fitting model
+        X_train, X_test, y_train, y_test = dataset.gen_data(
+            state_count, order, 30000, True
+        )  ## Fitting model
     args_training = {"X_train": X_train, "y_train": y_train}
     args_testing = {"X_test": X_test, "y_test": y_test}
     results_training = []
@@ -48,8 +52,8 @@ for _ in range(amount_to_average):
         print(f"Training: {training}")
         print(f"Testing: {testing}")
 
-        #print(m.__name__)
-        #print(results_testing[-1],end="\n\n")
+        # print(m.__name__)
+        # print(results_testing[-1],end="\n\n")
     print(results_training)
     print(results_testing)
     training_master.append(results_training)
@@ -60,7 +64,6 @@ def find_average(arr):
     return sum(arr) / len(arr)
 
 
-
 # creating the dataset
 def create_bar_graph(data, title):
     courses = list(data.keys())
@@ -69,10 +72,7 @@ def create_bar_graph(data, title):
     plt.figure(figsize=(10, 5))
 
     # creating the bar plot
-    plt.bar(courses, values, color='maroon',
-            width=0.4)
+    plt.bar(courses, values, color="maroon", width=0.4)
 
     plt.title(title)
     plt.show()
-
-

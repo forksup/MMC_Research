@@ -39,12 +39,14 @@ class PathEncoder(TransformerMixin, BaseEstimator):
 
     """
 
-    def __init__(self,
-                 order: int,
-                 sep: str = '>',
-                 r_just_string: str = 'null',
-                 input_vector: bool = False,
-                 return_vector: bool = False) -> None:
+    def __init__(
+        self,
+        order: int,
+        sep: str = ">",
+        r_just_string: str = "null",
+        input_vector: bool = False,
+        return_vector: bool = False,
+    ) -> None:
         self.order = order
         self.sep = sep
         self.r_just_string = r_just_string
@@ -53,7 +55,7 @@ class PathEncoder(TransformerMixin, BaseEstimator):
         self.label_dict = None
         self.label_dict_inverse = None
 
-    def fit(self, x: np.ndarray, y: Optional[np.ndarray] = None) -> 'PathEncoder':
+    def fit(self, x: np.ndarray, y: Optional[np.ndarray] = None) -> "PathEncoder":
         """
         Fit encoder.
 
@@ -70,7 +72,7 @@ class PathEncoder(TransformerMixin, BaseEstimator):
 
         unique_keys = []
         for i in x:
-            unique_keys.extend(i[0][-self.order:])
+            unique_keys.extend(i[0][-self.order :])
             unique_keys = list(set(unique_keys))
 
         unique_keys = list(set(unique_keys))
@@ -86,9 +88,9 @@ class PathEncoder(TransformerMixin, BaseEstimator):
 
         return self
 
-    def transform(self,
-                  x: np.ndarray,
-                  y: Optional[np.ndarray] = None) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    def transform(
+        self, x: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """
         Transform inputs from string paths into integer array.
 
@@ -105,7 +107,9 @@ class PathEncoder(TransformerMixin, BaseEstimator):
 
         x_new = []
         for i in x[:, 0]:
-            values_list = list(map(self.label_dict.get, i.split(self.sep)[-self.order:]))
+            values_list = list(
+                map(self.label_dict.get, i.split(self.sep)[-self.order :])
+            )
             while len(values_list) < self.order:
                 values_list = [self.label_dict[self.r_just_string]] + values_list
             x_new.append(values_list)
@@ -118,9 +122,9 @@ class PathEncoder(TransformerMixin, BaseEstimator):
         else:
             return np.array(x_new), np.vectorize(self.label_dict.get)(y)
 
-    def inverse_transform(self,
-                          x: np.ndarray,
-                          y: Optional[np.ndarray] = None) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    def inverse_transform(
+        self, x: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """
         Transform inputs from integer array into string paths.
 
@@ -135,12 +139,16 @@ class PathEncoder(TransformerMixin, BaseEstimator):
         if self.input_vector:
             x = x.reshape(-1, 1)
 
-        x_rev = [self.sep.join(list(map(self.label_dict_inverse.get, i))) for i in list(x)]
+        x_rev = [
+            self.sep.join(list(map(self.label_dict_inverse.get, i))) for i in list(x)
+        ]
 
         if y is None:
             return np.array(x_rev).reshape(-1, 1)
         else:
-            return np.array(x_rev).reshape(-1, 1), np.vectorize(self.label_dict_inverse.get)(y)
+            return np.array(x_rev).reshape(-1, 1), np.vectorize(
+                self.label_dict_inverse.get
+            )(y)
 
 
 class SequenceCutter(TransformerMixin):
@@ -166,11 +174,11 @@ class SequenceCutter(TransformerMixin):
 
     """
 
-    def __init__(self, order: int, sep: str = '>') -> None:
+    def __init__(self, order: int, sep: str = ">") -> None:
         self.order = order
         self.sep = sep
 
-    def fit(self, x: np.ndarray, y: Optional[np.ndarray] = None) -> 'SequenceCutter':
+    def fit(self, x: np.ndarray, y: Optional[np.ndarray] = None) -> "SequenceCutter":
         """
         Fit left for pipeline compatibility
         """
@@ -185,7 +193,9 @@ class SequenceCutter(TransformerMixin):
         :return: NumPy array of shape (n_samples, order)
         :return: NumPy array of shape (n_samples,)
         """
-        x_new = np.hstack([x[i:-self.order + i].reshape(-1, 1) for i in range(self.order)])
-        y = x[self.order:]
+        x_new = np.hstack(
+            [x[i : -self.order + i].reshape(-1, 1) for i in range(self.order)]
+        )
+        y = x[self.order :]
         x_new = np.array([self.sep.join(i) for i in x_new]).reshape(-1, 1)
         return x_new, y
