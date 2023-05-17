@@ -11,5 +11,5 @@ class MMC_M(MMC):
         verbose=False,
     ):
     
-        super(state_size, order, sgo_method, False).__init__()
+        super().__init__(state_size, order, sgo_method, False)
 
