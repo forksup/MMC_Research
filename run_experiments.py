@@ -221,6 +221,8 @@ def run_experiment(
                 ]
 
                 for b in range(len(metrics)):
+                    # MMC returns a list for test with 0 being the result
+                    # and 1 being the distribution of highest states
                     if isinstance(mm[b], list):
                         d_to_average[i][b].append(mm[b][0])
                     else:
