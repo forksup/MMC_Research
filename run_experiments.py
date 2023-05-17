@@ -221,7 +221,11 @@ def run_experiment(
                 ]
 
                 for b in range(len(metrics)):
-                    d_to_average[i][b].append(mm[b])
+                    if isinstance(mm[b], list):
+                        d_to_average[i][b].append(mm[b][0])
+                    else:
+                        d_to_average[i][b].append(mm[b])
+    
         for j, r in enumerate(d_to_average):
             for jj in range(len(metrics)):
                 data_results[r_arg][types[j]][metrics[jj]].append(
