@@ -15,7 +15,7 @@ state_size_args=None, order_size_args=None, save_path="/storage/data/experiment_
 
 An array of methods includes the various **models** to be ran.
 The data generator is the data source as shown below to be used to generate a dataset.
-runthreads is a boolean value used to enable threads, otherwise it will be ran sequentially. m_to_test can be eitehr, 'order', 'state_space', 'data_size'. m_to_test represents which metric to vary while keeping two other args static. For example, we may choose to give order_size_args a range of values (1,10,1), while keeping the state_size_args and data_size_args static at 15 and 20,000. One must be a range and the other two may be static values.
+amount_to_average configures how many trials to run averaging all the results. runthreads is a boolean value used to enable (or disable) threads, otherwise it will be ran sequentially. m_to_test can be either, 'order', 'state_space', 'data_size'. m_to_test represents which metric to vary while keeping two other args static. For example, we may choose to give order_size_args a range of values (1,10,1), while keeping the state_size_args and data_size_args static at 15 and 20,000. One must be a range and the other two may be static values.
 
 
 
